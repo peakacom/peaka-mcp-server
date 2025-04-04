@@ -9,6 +9,10 @@ export const QUERY_GOLDEN_SQL_URL_TEMPLATE = _.template(
   "metadata/<%= projectId %>/golden-sql/query?q=<%= query %>"
 );
 
+export const TRANSPILE_TRINO_SQL_URL_TEMPLATE = _.template(
+  "sql/transpile/<%= dialect %>"
+);
+
 export const PEAKA_SQL_RULE_SET = ` Double check the Trino SQL query above for common mistakes, including:
  -  Include catalog and schema prefices in your queries and wrap catalog and schema prefices with double quotes. Use table aliases. Wrap table names with double quotations if it contains spaces.
  -  Use single quotes for varchar columns.

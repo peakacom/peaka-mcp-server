@@ -1,10 +1,11 @@
 import "dotenv/config";
 import axios, { AxiosInstance } from "axios";
 import cache from "memory-cache";
-import { GoldenSqlResult, ProjectInfoResponse } from "./types";
+import { GoldenSqlResult, ProjectInfoResponse, QueryContainer } from "./types";
 import {
   DEFAULT_PEAKA_PARTNER_API_BASE_URL,
   QUERY_GOLDEN_SQL_URL_TEMPLATE,
+  TRANSPILE_TRINO_SQL_URL_TEMPLATE,
 } from "./constants";
 
 export class APIService {
@@ -40,6 +41,11 @@ export class APIService {
       cache.put("projectInfo", data, 1000 * 60 * 60);
       return data;
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
       throw error;
     }
   }
@@ -56,6 +62,33 @@ export class APIService {
       const response = await this.axiosInstance.get<GoldenSqlResult>(url);
       return response.data;
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async transpileQueryToTrinoDialect(
+    query: string
+  ): Promise<QueryContainer> {
+    try {
+      const url = TRANSPILE_TRINO_SQL_URL_TEMPLATE({
+        dialect: "trino",
+      });
+
+      const response = await this.axiosInstance.post<QueryContainer>(url, {
+        query,
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
       throw error;
     }
   }

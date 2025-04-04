@@ -46,11 +46,23 @@ server.addTool({
         progress: 0,
         total: 100,
       });
-      const result = await dataService.executeSQLQuery(query);
+
+      const transpiledQuery = await apiService.transpileQueryToTrinoDialect(
+        query
+      );
+
+      reportProgress({
+        progress: 50,
+        total: 100,
+      });
+
+      const result = await dataService.executeSQLQuery(transpiledQuery.query);
+
       reportProgress({
         progress: 100,
         total: 100,
       });
+
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };

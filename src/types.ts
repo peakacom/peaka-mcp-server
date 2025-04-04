@@ -20,3 +20,7 @@ export interface DataResult {
   order: number;
   value: unknown;
 }
+
+export interface QueryContainer {
+  query: string;
+}
