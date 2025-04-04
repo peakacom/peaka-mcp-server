@@ -1,0 +1,44 @@
+{
+  "name": "peaka-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for text2sql capabilities for Peaka",
+  "main": "dist/index.js",
+  "bin": {
+    "peaka-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peakacom/peaka-mcp-server.git"
+  },
+  "keywords": [
+    "peaka",
+    "mcp",
+    "ai"
+  ],
+  "author": "Ibrahim GURSES",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/peakacom/peaka-mcp-server/issues"
+  },
+  "homepage": "https://github.com/peakacom/peaka-mcp-server#readme",
+  "devDependencies": {
+    "@types/lodash": "^4.17.16",
+    "@types/memory-cache": "^0.2.6",
+    "@types/node": "^22.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
+    "fastmcp": "^1.21.0",
+    "lodash": "^4.17.21",
+    "memory-cache": "^0.2.0",
+    "trino-client": "^0.2.6",
+    "zod": "^3.24.2"
+  }
+}
