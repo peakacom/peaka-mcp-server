@@ -20,10 +20,15 @@ export class APIService {
   private axiosInstance: AxiosInstance;
 
   private constructor() {
+    let baseURL = process.env.PARTNER_API_BASE_URL
+      ? process.env.PARTNER_API_BASE_URL
+      : DEFAULT_PEAKA_PARTNER_API_BASE_URL;
+
+    if (!baseURL.endsWith("/")) {
+      baseURL += "/";
+    }
     this.axiosInstance = axios.create({
-      baseURL: process.env.PARTNER_API_BASE_URL
-        ? process.env.PARTNER_API_BASE_URL
-        : DEFAULT_PEAKA_PARTNER_API_BASE_URL,
+      baseURL,
       timeout: 15000,
       headers: { Authorization: `Bearer ${process.env.PEAKA_API_KEY || ""}` },
     });

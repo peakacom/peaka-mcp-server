@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 export const DEFAULT_PEAKA_PARTNER_API_BASE_URL =
-  "https://partner.peaka.studio/api/v1/";
+  "https://partner.peaka.studio/api/v1";
 
 export const DEFAULT_PEAKA_DBC_HOST = "https://dbc.peaka.studio:4567";
 
