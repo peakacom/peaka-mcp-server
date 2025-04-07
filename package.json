@@ -1,13 +1,23 @@
 {
-  "name": "peaka-mcp-server",
-  "version": "1.0.0",
+  "name": "@peaka/mcp-server-peaka",
+  "version": "0.0.2",
   "description": "MCP Server for text2sql capabilities for Peaka",
+  "type": "module",
   "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "peaka-mcp-server": "dist/index.js"
+    "mcp-server-peaka": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "access": "public",
   "scripts": {
-    "build": "tsc",
+    "postbuild": "shx chmod +x dist/*.js",
+    "check": "tsc --noEmit",
+    "build": "tsup src/index.ts --dts --format esm --external xdg-app-paths --external which",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -30,6 +40,7 @@
     "@types/memory-cache": "^0.2.6",
     "@types/node": "^22.14.0",
     "ts-node": "^10.9.2",
+    "tsup": "^8.4.0",
     "typescript": "^5.8.2"
   },
   "dependencies": {
