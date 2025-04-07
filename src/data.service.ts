@@ -29,6 +29,7 @@ export class DataService {
       if (queryResult.error) {
         throw new Error(queryResult.error.message);
       }
+
       if (!queryResult.data || !queryResult.columns) {
         return [];
       }

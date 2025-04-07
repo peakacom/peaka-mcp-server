@@ -101,7 +101,11 @@ export class APIService {
 
       let result: TableMetadata[] = [];
       for (const apiResult of apiResults) {
-        result = [...result, ...(apiResult.data as TableMetadataResult).result];
+        const apiResultData = apiResult.data as TableMetadataResult;
+        apiResultData.result.forEach((tableMetadata) => {
+          tableMetadata.fullTableNameToBeUsedInSQLQueries = `"${tableMetadata.catalogQueryName}"."${tableMetadata.schemaName}"."${tableMetadata.tableName}"`;
+        });
+        result = [...result, ...apiResultData.result];
       }
 
       return result;

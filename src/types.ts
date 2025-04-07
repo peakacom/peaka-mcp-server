@@ -44,6 +44,7 @@ export interface TableMetadata {
   useWithAI: boolean;
   columns?: ColumnMetadata[];
   relations?: RelationsMetadata[];
+  fullTableNameToBeUsedInSQLQueries: string;
 }
 
 export interface ColumnMetadata {

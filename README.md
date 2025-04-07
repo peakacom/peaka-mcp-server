@@ -10,16 +10,16 @@ This server enables LLMs to inspect schemas and execute sql queries on provided 
 
 ### Resources
 
-- peaka_sql_query_rule_set
+- `peaka_sql_query_rule_set`
   - Peaka SQL Query Rule Set is guidelines for writing sql queries for Peaka.
 
 ### Tools
 
-- peaka_schema_retriever
+- `peaka_schema_retriever`
   - Retrieve table metadata and schema. Metadata has column types and relationships of the table with other tables.
-- peaka_query_golden_sqls
+- `peaka_query_golden_sqls`
   - Query question/sql pairs from Peaka's golden sql vector store.
-- peaka_execute_sql_query
+- `peaka_execute_sql_query`
   - Runs the given sql query on Peaka.
 
 ## Usage with Claude Desktop
@@ -36,9 +36,7 @@ This server enables LLMs to inspect schemas and execute sql queries on provided 
       "command": "npx",
       "args": ["-y", "@peaka/mcp-server-peaka@latest"],
       "env": {
-        "DBC_BASE_URL": " https://dbc-test.peaka.host:4567",
-        "PEAKA_API_KEY": "<YOUR_API_KEY>",
-        "PARTNER_API_BASE_URL": "https://partner-test.peaka.host/api/v1"
+        "PEAKA_API_KEY": "<YOUR_API_KEY>"
       }
     }
   }
@@ -48,6 +46,16 @@ This server enables LLMs to inspect schemas and execute sql queries on provided 
 Change the `{PEAKA_API_KEY}` with your project API Key. Check out Peaka Documentation for creating your API Key and follow detailed instructions by clicking [here](https://docs.peaka.com/how-to-guides/how-to-generate-api-keys).
 
 - Restart Claude Desktop
+
+## Environment variables
+
+You can use following environment variable for configuration:
+
+| Name                 | Description                                                          | Default Value                       |
+| -------------------- | -------------------------------------------------------------------- | ----------------------------------- |
+| DBC_BASE_URL         | Base URL for the Peaka Data operations, used for running sql queries | https://dbc.peaka.host:4567         |
+| PEAKA_API_KEY        | Project API key for authenticating with Peaka services.              | -                                   |
+| PARTNER_API_BASE_URL | Base URL for Peaka partner API                                       | https://partner.peaka.studio/api/v1 |
 
 ## Contact
 

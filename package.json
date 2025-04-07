@@ -1,6 +1,6 @@
 {
   "name": "@peaka/mcp-server-peaka",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "MCP Server for text2sql capabilities for Peaka",
   "type": "module",
   "main": "dist/index.js",
@@ -39,6 +39,7 @@
     "@types/lodash": "^4.17.16",
     "@types/memory-cache": "^0.2.6",
     "@types/node": "^22.14.0",
+    "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2"
