@@ -1,10 +1,17 @@
 import "dotenv/config";
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import cache from "memory-cache";
-import { GoldenSqlResult, ProjectInfoResponse, QueryContainer } from "./types";
+import {
+  GoldenSqlResult,
+  ProjectInfoResponse,
+  QueryContainer,
+  TableMetadata,
+  TableMetadataResult,
+} from "./types";
 import {
   DEFAULT_PEAKA_PARTNER_API_BASE_URL,
   QUERY_GOLDEN_SQL_URL_TEMPLATE,
+  QUERY_TABLE_METADATA_URL_TEMPLATE,
   TRANSPILE_TRINO_SQL_URL_TEMPLATE,
 } from "./constants";
 
@@ -61,6 +68,38 @@ export class APIService {
 
       const response = await this.axiosInstance.get<GoldenSqlResult>(url);
       return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async queryForMetadata(
+    tableNames: string[]
+  ): Promise<TableMetadata[]> {
+    try {
+      const projectInfo = await this.getProjectInfo();
+      const apiCalls: Promise<AxiosResponse>[] = [];
+      for (const tableName of tableNames) {
+        const url = QUERY_TABLE_METADATA_URL_TEMPLATE({
+          projectId: projectInfo.projectId,
+          tableName: encodeURI(tableName),
+        });
+        apiCalls.push(this.axiosInstance.get<TableMetadataResult>(url));
+      }
+
+      const apiResults = await Promise.all(apiCalls);
+
+      let result: TableMetadata[] = [];
+      for (const apiResult of apiResults) {
+        result = [...result, ...(apiResult.data as TableMetadataResult).result];
+      }
+
+      return result;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {

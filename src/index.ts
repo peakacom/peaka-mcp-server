@@ -14,6 +14,27 @@ const apiService = APIService.Instance;
 const dataService = DataService.Instance;
 
 server.addTool({
+  name: "peaka_schema_retriever",
+  description:
+    "Retrieve table metadata and schema. Metadata has column types and relationships of the table with other tables.",
+  parameters: z.object({
+    tables: z.string().array(),
+  }),
+  execute: async (args, { log }) => {
+    try {
+      const query = args.tables;
+      const result = await apiService.queryForMetadata(query);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      };
+    } catch (error) {
+      log.error("Error querying  metadata", JSON.stringify(error));
+      throw new UserError("Error querying metadata Check your api key.");
+    }
+  },
+});
+
+server.addTool({
   name: "peaka_query_golden_sqls",
   description: "Query question/sql pairs from Peaka's golden sql vector store.",
   parameters: z.object({
