@@ -2,7 +2,7 @@
 
 Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcontextprotocol.io/introduction) for managing context between large language models (LLMs) and external systems.
 
-Peaka Model Context Protocol server that provides access to Peaka SQL text2SQL capabilities.
+Peaka Model Context Protocol server that provides access to Peaka's text2SQL capabilities.
 
 This server enables LLMs to inspect schemas and execute sql queries on provided Peaka projects.
 
