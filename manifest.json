@@ -1,0 +1,95 @@
+{
+  "manifest_version": "0.3",
+  "name": "peaka-mcp-server",
+  "display_name": "Peaka",
+  "version": "0.3.4",
+  "description": "MCP server for querying Peaka data using natural language and SQL",
+  "author": {
+    "name": "Peaka"
+  },
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "PEAKA_API_KEY": "${user_config.PEAKA_API_KEY}"
+      }
+    }
+  },
+  "user_config": {
+    "PEAKA_API_KEY": {
+      "type": "string",
+      "title": "Peaka API Key",
+      "description": "Your Peaka API key. Accepts both Partner API keys (multi-project) and Project API keys (single-project).",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "tools": [
+    {
+      "name": "peaka_list_projects",
+      "description": "List all projects accessible with the current API key, across all organizations and workspaces. Also shows the currently active project."
+    },
+    {
+      "name": "peaka_select_project",
+      "description": "Set the active project for the session. All subsequent tool calls will use this project. Use peaka_list_projects to find available project IDs. Pass an empty string to reset to the default project."
+    },
+    {
+      "name": "peaka_get_project_metadata",
+      "description": "Get metadata for all catalogs, schemas, and tables in the Peaka project in a single call. Optionally filter by catalogId and/or schemaName. Use this tool to discover the data structure before writing queries."
+    },
+    {
+      "name": "peaka_query_golden_sqls",
+      "description": "Query question/SQL pairs from Peaka's golden SQL vector store. If you find an existing query matching the user's question, just use it. Otherwise use the other tools to figure out the tables and write the query."
+    },
+    {
+      "name": "peaka_execute_sql_query",
+      "description": "Runs the given SQL query on Peaka. Before running, use peaka_get_project_metadata to determine tables and schemas. If tables are cacheable but not cached, warn the user and offer to start caching."
+    },
+    {
+      "name": "peaka_list_queries",
+      "description": "List all saved queries in the Peaka project. Returns query names, SQL content, and whether they are plain or materialized."
+    },
+    {
+      "name": "peaka_execute_query",
+      "description": "Execute a saved query by its ID in the Peaka project. Use peaka_list_queries to find available query IDs."
+    },
+    {
+      "name": "peaka_create_cache",
+      "description": "Create a cache for a table in the Peaka project. Caching a table improves query performance by storing the data locally."
+    },
+    {
+      "name": "peaka_get_cache_statuses",
+      "description": "Get all cache statuses for tables in the Peaka project. Returns the current caching state, execution history, and progress for each cached table."
+    },
+    {
+      "name": "peaka_list_catalogs",
+      "description": "List all available catalogs in the Peaka project. Returns catalog names, types, and connection info."
+    },
+    {
+      "name": "peaka_list_schemas",
+      "description": "List all available schemas for a given catalog in the Peaka project."
+    },
+    {
+      "name": "peaka_list_tables",
+      "description": "List all available tables for a given catalog and schema in the Peaka project."
+    },
+    {
+      "name": "peaka_list_columns",
+      "description": "List all columns for a given table in the Peaka project. Returns column names, data types, and constraints. Use peaka_get_project_metadata first to discover available catalogs, schemas, and tables."
+    },
+    {
+      "name": "peaka_refresh_project_metadata",
+      "description": "Refresh project metadata for a specific catalog. Use when a data source has structurally changed (e.g. new tables or columns added). This is a long-running operation that polls until completion."
+    },
+    {
+      "name": "peaka_get_metadata_refresh_status",
+      "description": "Check the current status of a metadata refresh job for a specific catalog."
+    }
+  ],
+  "keywords": ["peaka", "sql", "database", "analytics"],
+  "license": "MIT"
+}

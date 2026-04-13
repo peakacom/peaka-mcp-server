@@ -12,15 +12,41 @@ This server enables LLMs to inspect schemas and execute sql queries on provided 
 
 - `peaka_sql_query_rule_set`
   - Peaka SQL Query Rule Set is guidelines for writing sql queries for Peaka.
+- `peaka_artifact_template`
+  - Style guide and HTML template for generating visual reports, dashboards, and artifacts from Peaka query results.
 
 ### Tools
 
-- `peaka_schema_retriever`
-  - Retrieve table metadata and schema. Metadata has column types and relationships of the table with other tables.
 - `peaka_query_golden_sqls`
-  - Query question/sql pairs from Peaka's golden sql vector store.
+  - Query question/sql pairs from Peaka's golden sql vector store. If an existing query matches the user's question, it can be reused directly.
 - `peaka_execute_sql_query`
   - Runs the given sql query on Peaka.
+- `peaka_get_project_metadata`
+  - Get metadata for all catalogs, schemas, and tables in the Peaka project in a single call. Optionally filter by `catalogId` and/or `schemaName`.
+- `peaka_list_catalogs`
+  - List all available catalogs in the Peaka project. Returns catalog names, types, and connection info.
+- `peaka_list_schemas`
+  - List all available schemas for a given catalog in the Peaka project.
+- `peaka_list_tables`
+  - List all available tables for a given catalog and schema in the Peaka project.
+- `peaka_list_columns`
+  - List all columns for a given table in the Peaka project. Returns column names, data types, and constraints.
+- `peaka_create_cache`
+  - Create a cache for a table in the Peaka project. Caching a table improves query performance by storing the data locally.
+- `peaka_get_cache_statuses`
+  - Get all cache statuses for tables in the Peaka project, including current caching state, execution history, and progress.
+- `peaka_list_queries`
+  - List all saved queries in the Peaka project. Returns query names, SQL content, and whether they are plain or materialized.
+- `peaka_execute_query`
+  - Execute a saved query by its ID in the Peaka project.
+- `peaka_list_projects`
+  - List all projects accessible with the current API key, across all organizations and workspaces. Also shows the currently active project.
+- `peaka_select_project`
+  - Set the active project for the session. All subsequent tool calls will use this project. Pass an empty string to reset to the default project.
+- `peaka_refresh_project_metadata`
+  - Refresh project metadata for a specific catalog. Long-running; triggers the refresh and polls for completion.
+- `peaka_get_metadata_refresh_status`
+  - Check the current status of a metadata refresh job for a specific catalog.
 
 ## Usage with Claude Desktop
 
@@ -51,11 +77,10 @@ Change the `{PEAKA_API_KEY}` with your project API Key. Check out Peaka Document
 
 You can use following environment variable for configuration:
 
-| Name                 | Description                                                          | Default Value                       |
-| -------------------- | -------------------------------------------------------------------- | ----------------------------------- |
-| DBC_BASE_URL         | Base URL for the Peaka Data operations, used for running sql queries | https://dbc.peaka.host:4567         |
-| PEAKA_API_KEY        | Project API key for authenticating with Peaka services.              | -                                   |
-| PARTNER_API_BASE_URL | Base URL for Peaka partner API                                       | https://partner.peaka.studio/api/v1 |
+| Name                 | Description                                             | Default Value                       |
+| -------------------- | ------------------------------------------------------- | ----------------------------------- |
+| PEAKA_API_KEY        | Project API key for authenticating with Peaka services. | -                                   |
+| PARTNER_API_BASE_URL | Base URL for Peaka partner API                          | https://partner.peaka.studio/api/v1 |
 
 ## Contact
 
