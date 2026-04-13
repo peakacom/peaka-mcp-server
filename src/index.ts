@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { FastMCP, UserError } from "fastmcp";
 import { z } from "zod";
+import "dotenv/config";
 import { APIService } from "./api.service";
 import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE } from "./constants";
 import type { ProjectMetadataResponse, ColumnMetadata } from "./types";
