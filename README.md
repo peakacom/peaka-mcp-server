@@ -73,6 +73,16 @@ Change the `{PEAKA_API_KEY}` with your project API Key. Check out Peaka Document
 
 - Restart Claude Desktop
 
+## Packaging as a Claude Desktop extension
+
+This repo ships with a `pack` script that builds the server and then runs `mcpb pack` (from [`@anthropic-ai/mcpb`](https://www.npmjs.com/package/@anthropic-ai/mcpb)) to produce a `.mcpb` bundle — a zip-like archive containing the built server and `manifest.json` that Claude Desktop can load as a custom MCP extension.
+
+```bash
+npm run pack
+```
+
+This produces `peaka-mcp-server.mcpb` at the repo root. To install it, open Claude Desktop → Settings → Extensions -> Advanced Settings -> Install Extension -> Select the `.mcpb` file -> Enter your API key when prompted and enable the extension.
+
 ## Environment variables
 
 You can use following environment variable for configuration:
