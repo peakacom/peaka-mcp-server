@@ -23,8 +23,14 @@ This server enables LLMs to inspect schemas and execute sql queries on provided 
   - Runs the given sql query on Peaka.
 - `peaka_get_project_metadata`
   - Get metadata for all catalogs, schemas, and tables in the Peaka project in a single call. Optionally filter by `catalogId` and/or `schemaName`.
+- `peaka_list_catalogs`
+  - List all available catalogs in the Peaka project. Returns catalog names, types, and connection info.
+- `peaka_list_schemas`
+  - List all available schemas for a given catalog in the Peaka project.
 - `peaka_list_tables`
   - List all available tables for a given catalog and schema in the Peaka project.
+- `peaka_list_columns`
+  - List all columns for a given table in the Peaka project. Returns column names, data types, and constraints.
 - `peaka_create_cache`
   - Create a cache for a table in the Peaka project. Caching a table improves query performance by storing the data locally.
 - `peaka_get_cache_statuses`

@@ -66,10 +66,6 @@
       "description": "Get all cache statuses for tables in the Peaka project. Returns the current caching state, execution history, and progress for each cached table."
     },
     {
-      "name": "peaka_schema_retriever",
-      "description": "Retrieve table metadata and schema. Metadata has column types and relationships of the table with other tables. Use this tool if you can't find a golden query and you have to write the query yourself."
-    },
-    {
       "name": "peaka_list_catalogs",
       "description": "List all available catalogs in the Peaka project. Returns catalog names, types, and connection info."
     },
