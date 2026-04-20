@@ -20,6 +20,9 @@ const server = new FastMCP<PeakaSession>({
       const token = authHeader.slice(7);
       return { accessToken: token };
     },
+    health: {
+      enabled: true,
+    }
   }),
 });
 
