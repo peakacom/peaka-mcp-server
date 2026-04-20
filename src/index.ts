@@ -580,6 +580,7 @@ if (mode === "httpStream") {
     httpStream: {
       port: Number(process.env.PORT) || DEFAULT_PORT,
       stateless: true,
+      host: "0.0.0.0",
     },
   });
 } else {
