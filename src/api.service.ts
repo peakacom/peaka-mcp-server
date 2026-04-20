@@ -43,17 +43,24 @@ import {
   TRANSPILE_TRINO_SQL_URL_TEMPLATE,
 } from "./constants";
 
+export interface APIServiceOptions {
+  accessToken: string;
+  baseUrl?: string;
+  useCache?: boolean;
+}
+
 export class APIService {
-  private static _instance: APIService;
   private axiosInstance: AxiosInstance;
   private selectedProjectId: string | null = null;
   private keyType: "partner" | "project" | null = null;
   private detectionPromise: Promise<void> | null = null;
+  private useCache: boolean;
 
-  private constructor() {
-    let baseURL = process.env.PARTNER_API_BASE_URL
-      ? process.env.PARTNER_API_BASE_URL
-      : DEFAULT_PEAKA_PARTNER_API_BASE_URL;
+  constructor(options: APIServiceOptions) {
+    const { accessToken, baseUrl, useCache = true } = options;
+    this.useCache = useCache;
+
+    let baseURL = baseUrl || DEFAULT_PEAKA_PARTNER_API_BASE_URL;
 
     if (!baseURL.endsWith("/")) {
       baseURL += "/";
@@ -63,20 +70,18 @@ export class APIService {
       timeout: 15000,
     });
     this.axiosInstance.interceptors.request.use((config) => {
-      config.headers.Authorization = `Bearer ${process.env.PEAKA_API_KEY || ""}`;
+      config.headers.Authorization = `Bearer ${accessToken}`;
       return config;
     });
   }
 
-  public static get Instance() {
-    return this._instance || (this._instance = new this());
-  }
-
   public async getProjectInfo(): Promise<ProjectInfoResponse> {
     try {
-      const cachedResponse = cache.get("projectInfo");
-      if (cachedResponse) {
-        return cachedResponse as ProjectInfoResponse;
+      if (this.useCache) {
+        const cachedResponse = cache.get("projectInfo");
+        if (cachedResponse) {
+          return cachedResponse as ProjectInfoResponse;
+        }
       }
 
       const response = await this.axiosInstance.get<ProjectInfoResponse>(
@@ -84,7 +89,9 @@ export class APIService {
       );
 
       const data = response.data;
-      cache.put("projectInfo", data, 1000 * 60 * 60);
+      if (this.useCache) {
+        cache.put("projectInfo", data, 1000 * 60 * 60);
+      }
       return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -120,7 +127,7 @@ export class APIService {
 
   public async ensureReady(): Promise<void> {
     await this.ensureInitialized();
-    if (this.keyType === "partner" && !this.selectedProjectId) {
+    if (this.isPartnerKey() && !this.selectedProjectId) {
       const projects = await this.listAllProjects();
       const projectList = projects
         .map((p) => `  - ${p.projectName} (ID: ${p.projectId})`)

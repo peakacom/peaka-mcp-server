@@ -2,16 +2,26 @@
 import { FastMCP, UserError } from "fastmcp";
 import { z } from "zod";
 import "dotenv/config";
-import { APIService } from "./api.service";
-import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE } from "./constants";
-import type { ProjectMetadataResponse, ColumnMetadata } from "./types";
+import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE, DEFAULT_PORT } from "./constants";
+import type { ProjectMetadataResponse, ColumnMetadata, PeakaSession } from "./types";
+import { getMode, resolveService } from "./context";
 
-const server = new FastMCP({
+const mode = getMode();
+
+const server = new FastMCP<PeakaSession>({
   name: "Peaka",
   version: "1.0.0",
+  ...(mode === "httpStream" && {
+    authenticate: async (request) => {
+      const authHeader = request.headers.authorization;
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw new Error("Missing Bearer token");
+      }
+      const token = authHeader.slice(7);
+      return { accessToken: token };
+    },
+  }),
 });
-
-const apiService = APIService.Instance;
 
 // Filters metadata to reduce token usage for LLMs:
 // - Removes system columns (e.g. _q_pagination_anchor, _q_offset)
@@ -56,11 +66,12 @@ server.addTool({
   parameters: z.object({
     query: z.string(),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
+      const svc = resolveService(session);
+      await svc.ensureReady();
       const query = args.query;
-      const result = await apiService.queryForGoldenSqls(query);
+      const result = await svc.queryForGoldenSqls(query);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
@@ -86,16 +97,17 @@ server.addTool({
   parameters: z.object({
     query: z.string(),
   }),
-  execute: async (args, { log, reportProgress }) => {
+  execute: async (args, { log, reportProgress, session }) => {
     try {
-      await apiService.ensureReady();
+      const svc = resolveService(session);
+      await svc.ensureReady();
       const query = args.query;
       reportProgress({
         progress: 0,
         total: 100,
       });
 
-      const transpiledQuery = await apiService.transpileQueryToTrinoDialect(
+      const transpiledQuery = await svc.transpileQueryToTrinoDialect(
         query
       );
 
@@ -104,7 +116,7 @@ server.addTool({
         total: 100,
       });
 
-      const result = await apiService.executeSQLStatement(transpiledQuery.query);
+      const result = await svc.executeSQLStatement(transpiledQuery.query);
 
       reportProgress({
         progress: 100,
@@ -141,10 +153,11 @@ server.addTool({
       .optional()
       .describe("Optional schema name to filter metadata by a specific schema."),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.getProjectMetadata(
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.getProjectMetadata(
         args.catalogId,
         args.schemaName
       );
@@ -169,10 +182,11 @@ server.addTool({
   description:
     "List all available catalogs in the Peaka project. Returns catalog names, types, and connection info.",
   parameters: z.object({}),
-  execute: async (_, { log }) => {
+  execute: async (_, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.listCatalogs();
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.listCatalogs();
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
@@ -191,10 +205,11 @@ server.addTool({
   parameters: z.object({
     catalogId: z.string(),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.listSchemas(args.catalogId);
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.listSchemas(args.catalogId);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
@@ -214,10 +229,11 @@ server.addTool({
     catalogId: z.string(),
     schemaName: z.string(),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.listTables(args.catalogId, args.schemaName);
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.listTables(args.catalogId, args.schemaName);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
@@ -238,10 +254,11 @@ server.addTool({
     schemaName: z.string(),
     tableName: z.string(),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.listColumns(
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.listColumns(
         args.catalogId,
         args.schemaName,
         args.tableName
@@ -266,10 +283,11 @@ server.addTool({
     schemaName: z.string(),
     tableName: z.string(),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.createCache(
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.createCache(
         args.catalogId,
         args.schemaName,
         args.tableName
@@ -290,10 +308,11 @@ server.addTool({
   description:
     "Get all cache statuses for tables in the Peaka project. Returns the current caching state, execution history, and progress for each cached table.",
   parameters: z.object({}),
-  execute: async (_, { log }) => {
+  execute: async (_, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.getCacheStatuses();
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.getCacheStatuses();
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
@@ -310,10 +329,11 @@ server.addTool({
   description:
     "List all saved queries in the Peaka project. Returns query names, SQL content, and whether they are plain or materialized.",
   parameters: z.object({}),
-  execute: async (_, { log }) => {
+  execute: async (_, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.listQueries();
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.listQueries();
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
@@ -332,10 +352,11 @@ server.addTool({
   parameters: z.object({
     queryId: z.string(),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.executeQuery(args.queryId);
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.executeQuery(args.queryId);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
@@ -352,12 +373,12 @@ server.addTool({
   description:
     "List all projects accessible with the current API key, across all organizations and workspaces. Also shows the currently active project.",
   parameters: z.object({}),
-  execute: async (_, { log }) => {
+  execute: async (_, { log, session }) => {
     try {
-      await apiService.ensureInitialized();
-
-      if (!apiService.isPartnerKey()) {
-        const info = await apiService.getProjectInfo();
+      const svc = resolveService(session);
+      await svc.ensureInitialized();
+      if (!svc.isPartnerKey()) {
+        const info = await svc.getProjectInfo();
         return {
           content: [
             {
@@ -382,8 +403,8 @@ server.addTool({
         };
       }
 
-      const projects = await apiService.listAllProjects();
-      const activeProjectId = apiService.getSelectedProjectId();
+      const projects = await svc.listAllProjects();
+      const activeProjectId = svc.getSelectedProjectId();
       return {
         content: [
           {
@@ -415,12 +436,13 @@ server.addTool({
         "The project ID to set as active. Pass an empty string to reset to the default project."
       ),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureInitialized();
+      const svc = resolveService(session);
+      await svc.ensureInitialized();
 
-      if (!apiService.isPartnerKey()) {
-        const currentProjectId = apiService.getSelectedProjectId();
+      if (!svc.isPartnerKey()) {
+        const currentProjectId = svc.getSelectedProjectId();
         if (args.projectId === "" || args.projectId === currentProjectId) {
           return {
             content: [
@@ -437,7 +459,7 @@ server.addTool({
       }
 
       if (args.projectId === "") {
-        apiService.setActiveProject(null);
+        svc.setActiveProject(null);
         return {
           content: [
             {
@@ -447,7 +469,7 @@ server.addTool({
           ],
         };
       }
-      apiService.setActiveProject(args.projectId);
+      svc.setActiveProject(args.projectId);
       return {
         content: [
           {
@@ -464,13 +486,6 @@ server.addTool({
   },
 });
 
-const METADATA_REFRESH_TERMINAL_STATES = new Set([
-  "COMPLETED",
-  "FAILED",
-  "NOT_ACTIVE",
-  "STUCK",
-]);
-
 server.addTool({
   name: "peaka_refresh_project_metadata",
   description:
@@ -480,74 +495,13 @@ server.addTool({
       .string()
       .describe("The catalog ID to refresh metadata for."),
   }),
-  execute: async (args, { log, reportProgress }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
-
-      reportProgress({ progress: 0, total: 100 });
-
-      await apiService.refreshProjectMetadata(args.catalogId);
-
-      reportProgress({ progress: 10, total: 100 });
-
-      const maxPolls = 60;
-      let polls = 0;
-
-      while (polls < maxPolls) {
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-        polls++;
-
-        const statusResult = await apiService.getMetadataRefreshStatus(
-          args.catalogId
-        );
-
-        const progressValue = Math.min(
-          10 + Math.round((polls / maxPolls) * 90),
-          99
-        );
-        reportProgress({ progress: progressValue, total: 100 });
-
-        if (METADATA_REFRESH_TERMINAL_STATES.has(statusResult.status)) {
-          reportProgress({ progress: 100, total: 100 });
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify(
-                  {
-                    catalogId: args.catalogId,
-                    status: statusResult.status,
-                    message:
-                      statusResult.status === "COMPLETED"
-                        ? "Metadata refresh completed successfully."
-                        : `Metadata refresh ended with status: ${statusResult.status}`,
-                  },
-                  null,
-                  2
-                ),
-              },
-            ],
-          };
-        }
-      }
-
-      reportProgress({ progress: 100, total: 100 });
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.refreshProjectMetadata(args.catalogId);
       return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(
-              {
-                catalogId: args.catalogId,
-                status: "TIMEOUT",
-                message:
-                  "Metadata refresh is still running after 10 minutes. Use peaka_get_metadata_refresh_status to check progress.",
-              },
-              null,
-              2
-            ),
-          },
-        ],
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
     } catch (error) {
       if (error instanceof UserError) throw error;
@@ -568,10 +522,11 @@ server.addTool({
       .string()
       .describe("The catalog ID to check refresh status for."),
   }),
-  execute: async (args, { log }) => {
+  execute: async (args, { log, session }) => {
     try {
-      await apiService.ensureReady();
-      const result = await apiService.getMetadataRefreshStatus(
+      const svc = resolveService(session);
+      await svc.ensureReady();
+      const result = await svc.getMetadataRefreshStatus(
         args.catalogId
       );
       return {
@@ -616,6 +571,14 @@ server.addResource({
   },
 });
 
-server.start({
-  transportType: "stdio",
-});
+if (mode === "httpStream") {
+  server.start({
+    transportType: "httpStream",
+    httpStream: {
+      port: Number(process.env.PORT) || DEFAULT_PORT,
+      stateless: true,
+    },
+  });
+} else {
+  server.start({ transportType: "stdio" });
+}

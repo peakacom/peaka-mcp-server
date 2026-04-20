@@ -1,6 +1,8 @@
 export const DEFAULT_PEAKA_PARTNER_API_BASE_URL =
   "https://partner.peaka.studio/api/v1";
 
+export const DEFAULT_PORT = 3000;
+
 export const QUERY_GOLDEN_SQL_URL_TEMPLATE = ({
   projectId,
   query,

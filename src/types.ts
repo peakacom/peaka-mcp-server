@@ -1,3 +1,8 @@
+export interface PeakaSession {
+  accessToken: string;
+  [key: string]: unknown;
+}
+
 export interface ProjectInfoResponse {
   projectId?: string;
   projectName?: string;
