@@ -3,15 +3,13 @@ FROM node:23-alpine As development
 WORKDIR /usr/src/app
 
 COPY package.json ./
-COPY pnpm-lock.yaml ./
+COPY package-lock.json ./
 
-RUN npm install -g pnpm
-
-RUN pnpm install
+RUN npm ci
 
 COPY . .
 
-RUN pnpm run build
+RUN npm run build
 
 FROM node:23-alpine as production
 
@@ -25,12 +23,10 @@ ENV POSTHOG_DISABLED=true
 WORKDIR /usr/src/app
 
 COPY package.json ./
-COPY pnpm-lock.yaml ./
+COPY package-lock.json ./
 
-RUN npm install -g pnpm
-
-RUN pnpm install --prod
+RUN npm ci
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/index"]
