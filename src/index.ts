@@ -16,8 +16,13 @@ const server = new FastMCP<PeakaSession>({
       const authHeader = request.headers.authorization;
       if (!authHeader?.startsWith("Bearer ")) {
         const authServerUrl = process.env.OAUTH_AUTHORIZATION_SERVER_URL;
+        if (!authServerUrl) {
+          throw new Error("No OAUTH_AUTHORIZATION_SERVER_URL in the env");
+        }
+        const resourceMetadataUrl = new URL(authServerUrl);
+        resourceMetadataUrl.pathname = ".well-known/oauth-authorization-server";
         const wwwAuth = authServerUrl
-          ? `Bearer resource_metadata="${authServerUrl}/.well-known/oauth-authorization-server"`
+          ? `Bearer resource_metadata="${resourceMetadataUrl.toString()}"`
           : `Bearer`;
         throw new Response(
           JSON.stringify({
@@ -98,7 +103,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error querying golden sqls", JSON.stringify(error));
-      throw new UserError("Error querying golden sqls. Check your api key.");
     }
   },
 });
@@ -192,7 +196,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error getting project metadata", JSON.stringify(error));
-      throw new UserError("Error getting project metadata. Check your api key.");
     }
   },
 });
@@ -213,7 +216,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error listing catalogs", JSON.stringify(error));
-      throw new UserError("Error listing catalogs. Check your api key.");
     }
   },
 });
@@ -236,7 +238,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error listing schemas", JSON.stringify(error));
-      throw new UserError("Error listing schemas. Check your api key.");
     }
   },
 });
@@ -260,7 +261,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error listing tables", JSON.stringify(error));
-      throw new UserError("Error listing tables. Check your api key.");
     }
   },
 });
@@ -289,7 +289,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error listing columns", JSON.stringify(error));
-      throw new UserError("Error listing columns. Check your api key.");
     }
   },
 });
@@ -318,7 +317,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error creating cache", JSON.stringify(error));
-      throw new UserError("Error creating cache. Check your api key.");
     }
   },
 });
@@ -339,7 +337,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error getting cache statuses", JSON.stringify(error));
-      throw new UserError("Error getting cache statuses. Check your api key.");
     }
   },
 });
@@ -360,7 +357,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error listing queries", JSON.stringify(error));
-      throw new UserError("Error listing queries. Check your api key.");
     }
   },
 });
@@ -383,7 +379,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error executing query", JSON.stringify(error));
-      throw new UserError("Error executing query. Check your query ID and api key.");
     }
   },
 });
@@ -440,7 +435,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error listing projects", JSON.stringify(error));
-      throw new UserError("Error listing projects. Check your api key.");
     }
   },
 });
@@ -526,9 +520,6 @@ server.addTool({
     } catch (error) {
       if (error instanceof UserError) throw error;
       log.error("Error refreshing project metadata", JSON.stringify(error));
-      throw new UserError(
-        "Error refreshing project metadata. Check your api key and catalog ID."
-      );
     }
   },
 });
@@ -557,9 +548,6 @@ server.addTool({
       log.error(
         "Error getting metadata refresh status",
         JSON.stringify(error)
-      );
-      throw new UserError(
-        "Error getting metadata refresh status. Check your api key and catalog ID."
       );
     }
   },
