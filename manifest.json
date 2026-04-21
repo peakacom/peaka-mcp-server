@@ -31,63 +31,59 @@
   "tools": [
     {
       "name": "peaka_list_projects",
-      "description": "List all projects accessible with the current API key, across all organizations and workspaces. Also shows the currently active project."
-    },
-    {
-      "name": "peaka_select_project",
-      "description": "Set the active project for the session. All subsequent tool calls will use this project. Use peaka_list_projects to find available project IDs. Pass an empty string to reset to the default project."
+      "description": "List all projects accessible with the current API key. For Partner API keys, enumerates projects across all organizations and workspaces. For Project API keys, returns the single project bound to the key. Use this to discover projectIds, then pass the chosen projectId to subsequent tool calls."
     },
     {
       "name": "peaka_get_project_metadata",
-      "description": "Get metadata for all catalogs, schemas, and tables in the Peaka project in a single call. Optionally filter by catalogId and/or schemaName. Use this tool to discover the data structure before writing queries."
+      "description": "Get metadata for all catalogs, schemas, and tables in a Peaka project in a single call. Optionally filter by catalogId and/or schemaName. Requires projectId. Use this tool to discover the data structure before writing queries."
     },
     {
       "name": "peaka_query_golden_sqls",
-      "description": "Query question/SQL pairs from Peaka's golden SQL vector store. If you find an existing query matching the user's question, just use it. Otherwise use the other tools to figure out the tables and write the query."
+      "description": "Query question/SQL pairs from Peaka's golden SQL vector store. Requires projectId. If you find an existing query matching the user's question, just use it. Otherwise use the other tools to figure out the tables and write the query."
     },
     {
       "name": "peaka_execute_sql_query",
-      "description": "Runs the given SQL query on Peaka. Before running, use peaka_get_project_metadata to determine tables and schemas. If tables are cacheable but not cached, warn the user and offer to start caching."
+      "description": "Runs the given SQL query on Peaka. Requires projectId. Before running, use peaka_get_project_metadata to determine tables and schemas. If tables are cacheable but not cached, warn the user and offer to start caching."
     },
     {
       "name": "peaka_list_queries",
-      "description": "List all saved queries in the Peaka project. Returns query names, SQL content, and whether they are plain or materialized."
+      "description": "List all saved queries in a Peaka project. Requires projectId. Returns query names, SQL content, and whether they are plain or materialized."
     },
     {
       "name": "peaka_execute_query",
-      "description": "Execute a saved query by its ID in the Peaka project. Use peaka_list_queries to find available query IDs."
+      "description": "Execute a saved query by its ID in a Peaka project. Requires projectId. Use peaka_list_queries to find available query IDs."
     },
     {
       "name": "peaka_create_cache",
-      "description": "Create a cache for a table in the Peaka project. Caching a table improves query performance by storing the data locally."
+      "description": "Create a cache for a table in a Peaka project. Requires projectId. Caching a table improves query performance by storing the data locally."
     },
     {
       "name": "peaka_get_cache_statuses",
-      "description": "Get all cache statuses for tables in the Peaka project. Returns the current caching state, execution history, and progress for each cached table."
+      "description": "Get all cache statuses for tables in a Peaka project. Requires projectId. Returns the current caching state, execution history, and progress for each cached table."
     },
     {
       "name": "peaka_list_catalogs",
-      "description": "List all available catalogs in the Peaka project. Returns catalog names, types, and connection info."
+      "description": "List all available catalogs in a Peaka project. Requires projectId. Returns catalog names, types, and connection info."
     },
     {
       "name": "peaka_list_schemas",
-      "description": "List all available schemas for a given catalog in the Peaka project."
+      "description": "List all available schemas for a given catalog in a Peaka project. Requires projectId."
     },
     {
       "name": "peaka_list_tables",
-      "description": "List all available tables for a given catalog and schema in the Peaka project."
+      "description": "List all available tables for a given catalog and schema in a Peaka project. Requires projectId."
     },
     {
       "name": "peaka_list_columns",
-      "description": "List all columns for a given table in the Peaka project. Returns column names, data types, and constraints. Use peaka_get_project_metadata first to discover available catalogs, schemas, and tables."
+      "description": "List all columns for a given table in a Peaka project. Requires projectId. Returns column names, data types, and constraints. Use peaka_get_project_metadata first to discover available catalogs, schemas, and tables."
     },
     {
       "name": "peaka_refresh_project_metadata",
-      "description": "Refresh project metadata for a specific catalog. Use when a data source has structurally changed (e.g. new tables or columns added). This is a long-running operation that polls until completion."
+      "description": "Refresh project metadata for a specific catalog. Requires projectId. Use when a data source has structurally changed (e.g. new tables or columns added). This is a long-running operation that polls until completion."
     },
     {
       "name": "peaka_get_metadata_refresh_status",
-      "description": "Check the current status of a metadata refresh job for a specific catalog."
+      "description": "Check the current status of a metadata refresh job for a specific catalog. Requires projectId."
     }
   ],
   "keywords": ["peaka", "sql", "database", "analytics"],

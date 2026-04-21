@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import cache from "memory-cache";
 import {
   Catalog,
   ColumnDetail,
@@ -46,19 +45,13 @@ import {
 export interface APIServiceOptions {
   accessToken: string;
   baseUrl?: string;
-  useCache?: boolean;
 }
 
 export class APIService {
   private axiosInstance: AxiosInstance;
-  private selectedProjectId: string | null = null;
-  private keyType: "partner" | "project" | null = null;
-  private detectionPromise: Promise<void> | null = null;
-  private useCache: boolean;
 
   constructor(options: APIServiceOptions) {
-    const { accessToken, baseUrl, useCache = true } = options;
-    this.useCache = useCache;
+    const { accessToken, baseUrl } = options;
 
     let baseURL = baseUrl || DEFAULT_PEAKA_PARTNER_API_BASE_URL;
 
@@ -77,22 +70,10 @@ export class APIService {
 
   public async getProjectInfo(): Promise<ProjectInfoResponse> {
     try {
-      if (this.useCache) {
-        const cachedResponse = cache.get("projectInfo");
-        if (cachedResponse) {
-          return cachedResponse as ProjectInfoResponse;
-        }
-      }
-
       const response = await this.axiosInstance.get<ProjectInfoResponse>(
         "info"
       );
-
-      const data = response.data;
-      if (this.useCache) {
-        cache.put("projectInfo", data, 1000 * 60 * 60);
-      }
-      return data;
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
@@ -103,81 +84,11 @@ export class APIService {
     }
   }
 
-  public async ensureInitialized(): Promise<void> {
-    if (this.keyType) return;
-    if (this.detectionPromise) return this.detectionPromise;
-
-    this.detectionPromise = (async () => {
-      try {
-        const info = await this.getProjectInfo();
-        if (info.projectId) {
-          this.keyType = "project";
-          this.selectedProjectId = info.projectId;
-        } else {
-          this.keyType = "partner";
-        }
-      } catch (error) {
-        this.detectionPromise = null;
-        throw error;
-      }
-    })();
-
-    return this.detectionPromise;
-  }
-
-  public async ensureReady(): Promise<void> {
-    await this.ensureInitialized();
-    if (this.isPartnerKey() && !this.selectedProjectId) {
-      const projects = await this.listAllProjects();
-      const projectList = projects
-        .map((p) => `  - ${p.projectName} (ID: ${p.projectId})`)
-        .join("\n");
-      throw new Error(
-        `No project selected. Ask the user to select a project. Available projects:\n${projectList}\nUse peaka_select_project to set one.\n`
-      );
-    }
-  }
-
-  public getKeyType(): "partner" | "project" | null {
-    return this.keyType;
-  }
-
-  public isPartnerKey(): boolean {
-    return this.keyType === "partner";
-  }
-
-  public async getActiveProjectId(): Promise<string> {
-    if (this.selectedProjectId) {
-      return this.selectedProjectId;
-    }
-
-    const projects = await this.listAllProjects();
-    const projectList = projects
-      .map((p) => `  - ${p.projectName} (ID: ${p.projectId})`)
-      .join("\n");
-
-    throw new Error(
-      `No project selected. Ask the user to select a project. Available projects:\n${projectList}\nUse peaka_select_project to set one.\n`
-    );
-  }
-
-  public setActiveProject(projectId: string | null): void {
-    if (this.keyType === "project" && projectId !== this.selectedProjectId) {
-      throw new Error(
-        `This is a Project API key scoped to project '${this.selectedProjectId}'. Cannot switch to a different project.`
-      );
-    }
-    this.selectedProjectId = projectId;
-  }
-
-  public getSelectedProjectId(): string | null {
-    return this.selectedProjectId;
-  }
-
-  public async queryForGoldenSqls(query: string): Promise<GoldenSqlResult> {
+  public async queryForGoldenSqls(
+    projectId: string,
+    query: string
+  ): Promise<GoldenSqlResult> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = QUERY_GOLDEN_SQL_URL_TEMPLATE({
         projectId,
         query: encodeURI(query),
@@ -196,10 +107,10 @@ export class APIService {
   }
 
   public async queryForMetadata(
+    projectId: string,
     tableNames: string[]
   ): Promise<TableMetadata[]> {
     try {
-      const projectId = await this.getActiveProjectId();
       const apiCalls: Promise<AxiosResponse>[] = [];
       for (const tableName of tableNames) {
         const url = QUERY_TABLE_METADATA_URL_TEMPLATE({
@@ -232,12 +143,11 @@ export class APIService {
   }
 
   public async getProjectMetadata(
+    projectId: string,
     catalogId?: string,
     schemaName?: string
   ): Promise<ProjectMetadataResponse> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = GET_PROJECT_METADATA_URL_TEMPLATE({
         projectId,
       });
@@ -262,10 +172,8 @@ export class APIService {
     }
   }
 
-  public async listCatalogs(): Promise<Catalog[]> {
+  public async listCatalogs(projectId: string): Promise<Catalog[]> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = LIST_CATALOGS_URL_TEMPLATE({
         projectId,
       });
@@ -282,10 +190,11 @@ export class APIService {
     }
   }
 
-  public async listSchemas(catalogId: string): Promise<Schema[]> {
+  public async listSchemas(
+    projectId: string,
+    catalogId: string
+  ): Promise<Schema[]> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = LIST_SCHEMAS_URL_TEMPLATE({
         projectId,
         catalogId,
@@ -303,10 +212,12 @@ export class APIService {
     }
   }
 
-  public async listTables(catalogId: string, schemaName: string): Promise<Table[]> {
+  public async listTables(
+    projectId: string,
+    catalogId: string,
+    schemaName: string
+  ): Promise<Table[]> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = LIST_TABLES_URL_TEMPLATE({
         projectId,
         catalogId,
@@ -326,13 +237,12 @@ export class APIService {
   }
 
   public async listColumns(
+    projectId: string,
     catalogId: string,
     schemaName: string,
     tableName: string
   ): Promise<ColumnDetail[]> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = LIST_COLUMNS_URL_TEMPLATE({
         projectId,
         catalogId,
@@ -353,13 +263,12 @@ export class APIService {
   }
 
   public async createCache(
+    projectId: string,
     catalogId: string,
     schemaName: string,
     tableName: string
   ): Promise<Cache> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = CREATE_CACHE_URL_TEMPLATE({
         projectId,
       });
@@ -380,10 +289,8 @@ export class APIService {
     }
   }
 
-  public async getCacheStatuses(): Promise<CacheStatus[]> {
+  public async getCacheStatuses(projectId: string): Promise<CacheStatus[]> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = GET_CACHE_STATUSES_URL_TEMPLATE({
         projectId,
       });
@@ -400,10 +307,8 @@ export class APIService {
     }
   }
 
-  public async listQueries(): Promise<SavedQuery[]> {
+  public async listQueries(projectId: string): Promise<SavedQuery[]> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = LIST_QUERIES_URL_TEMPLATE({
         projectId,
       });
@@ -420,10 +325,11 @@ export class APIService {
     }
   }
 
-  public async executeQuery(queryId: string): Promise<QueryResult> {
+  public async executeQuery(
+    projectId: string,
+    queryId: string
+  ): Promise<QueryResult> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = EXECUTE_QUERY_URL_TEMPLATE({
         projectId,
       });
@@ -442,10 +348,11 @@ export class APIService {
     }
   }
 
-  public async executeSQLStatement(statement: string): Promise<QueryResult> {
+  public async executeSQLStatement(
+    projectId: string,
+    statement: string
+  ): Promise<QueryResult> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = EXECUTE_QUERY_URL_TEMPLATE({
         projectId,
       });
@@ -561,11 +468,10 @@ export class APIService {
   }
 
   public async refreshProjectMetadata(
+    projectId: string,
     catalogId: string
   ): Promise<MetadataRefreshResponse> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = REFRESH_PROJECT_METADATA_URL_TEMPLATE({
         projectId,
       });
@@ -587,11 +493,10 @@ export class APIService {
   }
 
   public async getMetadataRefreshStatus(
+    projectId: string,
     catalogId: string
   ): Promise<MetadataRefreshStatusResponse> {
     try {
-      const projectId = await this.getActiveProjectId();
-
       const url = GET_METADATA_REFRESH_STATUS_URL_TEMPLATE({
         projectId,
         catalogId,
