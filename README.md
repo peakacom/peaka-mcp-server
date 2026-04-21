@@ -91,7 +91,7 @@ You can use following environment variable for configuration:
 | -------------------- | ------------------------------------------------------- | ----------------------------------- |
 | PEAKA_API_KEY        | Project API key for authenticating with Peaka services. | -                                   |
 | PARTNER_API_BASE_URL | Base URL for Peaka partner API                          | https://partner.peaka.studio/api/v1 |
-| AUTH_SERVER_URL      | Protected-resource metadata URL advertised in the `WWW-Authenticate` header on 401 responses (httpStream mode). | -                                   |
+| OAUTH_AUTHORIZATION_SERVER_URL      | Protected-resource metadata URL advertised in the `WWW-Authenticate` header on 401 responses (httpStream mode). | -                                   |
 
 ## Contact
 

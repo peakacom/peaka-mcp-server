@@ -15,7 +15,7 @@ const server = new FastMCP<PeakaSession>({
     authenticate: async (request) => {
       const authHeader = request.headers.authorization;
       if (!authHeader?.startsWith("Bearer ")) {
-        const authServerUrl = process.env.AUTH_SERVER_URL;
+        const authServerUrl = process.env.OAUTH_AUTHORIZATION_SERVER_URL;
         const wwwAuth = authServerUrl
           ? `Bearer resource_metadata="${authServerUrl}"`
           : `Bearer`;
