@@ -15,7 +15,24 @@ const server = new FastMCP<PeakaSession>({
     authenticate: async (request) => {
       const authHeader = request.headers.authorization;
       if (!authHeader?.startsWith("Bearer ")) {
-        throw new Error("Missing Bearer token");
+        const authServerUrl = process.env.AUTH_SERVER_URL;
+        const wwwAuth = authServerUrl
+          ? `Bearer resource_metadata="${authServerUrl}"`
+          : `Bearer`;
+        throw new Response(
+          JSON.stringify({
+            error: "unauthorized",
+            error_description: "Missing Bearer token",
+          }),
+          {
+            status: 401,
+            statusText: "Unauthorized",
+            headers: {
+              "WWW-Authenticate": wwwAuth,
+              "Content-Type": "application/json",
+            },
+          },
+        );
       }
       const token = authHeader.slice(7);
       return { accessToken: token };
