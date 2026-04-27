@@ -17,6 +17,10 @@ This server enables LLMs to inspect schemas and execute sql queries on provided 
 
 ### Tools
 
+Every project-scoped tool takes a `projectId` argument. If the MCP client does not already know the projectId, it should call `peaka_list_projects` first and pass the chosen id to subsequent calls. The server itself is stateless with respect to project selection — each call carries its own projectId.
+
+- `peaka_list_projects`
+  - List all projects accessible with the current API key. For Partner API keys, enumerates projects across all organizations and workspaces. For Project API keys, returns the single project bound to the key.
 - `peaka_query_golden_sqls`
   - Query question/sql pairs from Peaka's golden sql vector store. If an existing query matches the user's question, it can be reused directly.
 - `peaka_execute_sql_query`
@@ -39,10 +43,6 @@ This server enables LLMs to inspect schemas and execute sql queries on provided 
   - List all saved queries in the Peaka project. Returns query names, SQL content, and whether they are plain or materialized.
 - `peaka_execute_query`
   - Execute a saved query by its ID in the Peaka project.
-- `peaka_list_projects`
-  - List all projects accessible with the current API key, across all organizations and workspaces. Also shows the currently active project.
-- `peaka_select_project`
-  - Set the active project for the session. All subsequent tool calls will use this project. Pass an empty string to reset to the default project.
 - `peaka_refresh_project_metadata`
   - Refresh project metadata for a specific catalog. Long-running; triggers the refresh and polls for completion.
 - `peaka_get_metadata_refresh_status`
@@ -91,6 +91,7 @@ You can use following environment variable for configuration:
 | -------------------- | ------------------------------------------------------- | ----------------------------------- |
 | PEAKA_API_KEY        | Project API key for authenticating with Peaka services. | -                                   |
 | PARTNER_API_BASE_URL | Base URL for Peaka partner API                          | https://partner.peaka.studio/api/v1 |
+| OAUTH_AUTHORIZATION_SERVER_URL      | Protected-resource metadata URL advertised in the `WWW-Authenticate` header on 401 responses (httpStream mode). | -                                   |
 
 ## Contact
 
