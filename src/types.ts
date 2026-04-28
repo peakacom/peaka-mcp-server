@@ -182,6 +182,11 @@ export interface RefreshCacheFullResponse {
   message: string;
 }
 
+export interface RefreshCacheIncrementalResponse {
+  status: string;
+  message: string;
+}
+
 export interface QuerySchedule {
   expression: string;
   type: string;

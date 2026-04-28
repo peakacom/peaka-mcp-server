@@ -76,6 +76,14 @@ export const REFRESH_CACHE_FULL_URL_TEMPLATE = ({
   cacheId: string;
 }) => `data/projects/${projectId}/cache/${cacheId}/fullRefreshUpdate`;
 
+export const REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE = ({
+  projectId,
+  cacheId,
+}: {
+  projectId: string;
+  cacheId: string;
+}) => `data/projects/${projectId}/cache/${cacheId}/incrementalUpdate`;
+
 export const LIST_QUERIES_URL_TEMPLATE = ({
   projectId,
 }: {
