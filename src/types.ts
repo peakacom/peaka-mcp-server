@@ -192,6 +192,16 @@ export interface CacheScheduleInput {
   expression: string;
 }
 
+export interface CreateCacheRequest {
+  catalogId: string;
+  schemaName: string;
+  tableName: string;
+  incrementalCacheSchedule?: CacheScheduleInput;
+  fullRefreshCacheSchedule?: CacheScheduleInput;
+}
+
+export type CreateCacheBatchRequest = CreateCacheRequest[];
+
 export interface UpdateCacheRequest {
   incrementalCacheSchedule: CacheScheduleInput;
   fullRefreshCacheSchedule: CacheScheduleInput;

@@ -16,6 +16,8 @@ import {
   TableMetadata,
   Cache,
   CacheStatus,
+  CreateCacheRequest,
+  CreateCacheBatchRequest,
   RefreshCacheFullResponse,
   RefreshCacheIncrementalResponse,
   UpdateCacheRequest,
@@ -30,6 +32,7 @@ import {
 } from "./types";
 import {
   CREATE_CACHE_URL_TEMPLATE,
+  CREATE_CACHE_BATCH_URL_TEMPLATE,
   GET_CACHE_STATUSES_URL_TEMPLATE,
   REFRESH_CACHE_FULL_URL_TEMPLATE,
   REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE,
@@ -278,20 +281,35 @@ export class APIService {
 
   public async createCache(
     projectId: string,
-    catalogId: string,
-    schemaName: string,
-    tableName: string
+    body: CreateCacheRequest
   ): Promise<Cache> {
     try {
       const url = CREATE_CACHE_URL_TEMPLATE({
         projectId,
       });
 
-      const response = await this.axiosInstance.post<Cache>(url, {
-        catalogId,
-        schemaName,
-        tableName,
+      const response = await this.axiosInstance.post<Cache>(url, body);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async createCacheBatch(
+    projectId: string,
+    body: CreateCacheBatchRequest
+  ): Promise<Cache[]> {
+    try {
+      const url = CREATE_CACHE_BATCH_URL_TEMPLATE({
+        projectId,
       });
+
+      const response = await this.axiosInstance.post<Cache[]>(url, body);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

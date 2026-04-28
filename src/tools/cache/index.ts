@@ -1,5 +1,6 @@
 import type { ToolRegister } from "../types";
 import { registerCreateCacheTool } from "./createCache";
+import { registerCreateCacheBatchTool } from "./createCacheBatch";
 import { registerDeleteCacheTool } from "./deleteCache";
 import { registerGetCacheStatusesTool } from "./getCacheStatuses";
 import { registerRefreshCacheFullTool } from "./refreshCacheFull";
@@ -8,6 +9,7 @@ import { registerUpdateCacheTool } from "./updateCache";
 
 export const registerCacheTools: ToolRegister = (server) => {
   registerCreateCacheTool(server);
+  registerCreateCacheBatchTool(server);
   registerGetCacheStatusesTool(server);
   registerRefreshCacheFullTool(server);
   registerRefreshCacheIncrementalTool(server);

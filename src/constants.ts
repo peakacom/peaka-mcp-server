@@ -62,6 +62,12 @@ export const CREATE_CACHE_URL_TEMPLATE = ({
   projectId: string;
 }) => `data/projects/${projectId}/cache`;
 
+export const CREATE_CACHE_BATCH_URL_TEMPLATE = ({
+  projectId,
+}: {
+  projectId: string;
+}) => `data/projects/${projectId}/cache/batch`;
+
 export const GET_CACHE_STATUSES_URL_TEMPLATE = ({
   projectId,
 }: {
