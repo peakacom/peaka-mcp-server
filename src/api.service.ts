@@ -21,6 +21,9 @@ import {
   UpdateCacheRequest,
   DeleteCacheResponse,
   SavedQuery,
+  CreateQueryRequest,
+  UpdateQueryRequest,
+  DeleteQueryResponse,
   QueryResult,
   TableMetadataResult,
   Workspace,
@@ -36,6 +39,9 @@ import {
   GET_PROJECT_METADATA_URL_TEMPLATE,
   EXECUTE_QUERY_URL_TEMPLATE,
   LIST_QUERIES_URL_TEMPLATE,
+  CREATE_QUERY_URL_TEMPLATE,
+  UPDATE_QUERY_URL_TEMPLATE,
+  DELETE_QUERY_URL_TEMPLATE,
   DEFAULT_PEAKA_PARTNER_API_BASE_URL,
   LIST_CATALOGS_URL_TEMPLATE,
   LIST_COLUMNS_URL_TEMPLATE,
@@ -416,6 +422,74 @@ export class APIService {
       });
 
       const response = await this.axiosInstance.get<SavedQuery[]>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async createQuery(
+    projectId: string,
+    body: CreateQueryRequest
+  ): Promise<SavedQuery> {
+    try {
+      const url = CREATE_QUERY_URL_TEMPLATE({
+        projectId,
+      });
+
+      const response = await this.axiosInstance.post<SavedQuery>(url, body);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async updateQuery(
+    projectId: string,
+    queryId: string,
+    body: UpdateQueryRequest
+  ): Promise<SavedQuery> {
+    try {
+      const url = UPDATE_QUERY_URL_TEMPLATE({
+        projectId,
+        queryId,
+      });
+
+      const response = await this.axiosInstance.put<SavedQuery>(url, body);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async deleteQuery(
+    projectId: string,
+    queryId: string
+  ): Promise<DeleteQueryResponse> {
+    try {
+      const url = DELETE_QUERY_URL_TEMPLATE({
+        projectId,
+        queryId,
+      });
+
+      const response = await this.axiosInstance.delete<DeleteQueryResponse>(
+        url
+      );
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

@@ -193,8 +193,8 @@ export interface CacheScheduleInput {
 }
 
 export interface UpdateCacheRequest {
-  incrementalCacheSchedule?: CacheScheduleInput;
-  fullRefreshCacheSchedule?: CacheScheduleInput;
+  incrementalCacheSchedule: CacheScheduleInput;
+  fullRefreshCacheSchedule: CacheScheduleInput;
 }
 
 export interface DeleteCacheResponse {
@@ -214,6 +214,24 @@ export interface SavedQuery {
   inputQueryRefId: string;
   queryType: string;
   schedule: QuerySchedule | null;
+}
+
+export type SavedQueryType = "PLAIN" | "MATERIALIZED";
+
+export interface CreateQueryRequest {
+  displayName: string;
+  inputQuery: string;
+  queryType: SavedQueryType;
+}
+
+export interface UpdateQueryRequest {
+  displayName?: string;
+  inputQuery?: string;
+  queryType?: SavedQueryType;
+}
+
+export interface DeleteQueryResponse {
+  ok: boolean;
 }
 
 export interface QueryResultColumn {

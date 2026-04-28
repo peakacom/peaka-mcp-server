@@ -3,13 +3,12 @@ import { z } from "zod";
 import { resolveService } from "../../context";
 import { PROJECT_ID_HINT } from "../shared";
 import type { ToolRegister } from "../types";
-import type { UpdateCacheRequest } from "../../types";
 
 export const registerUpdateCacheTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_update_cache",
     description:
-      `Update cache settings on an existing cache in the Peaka project. Adjusts the incremental and/or full-refresh schedule expressions. Schedule expressions use ISO-8601 durations (e.g. PT6H, P1D, P7D, P30D). At least one of incrementalSchedule or fullRefreshSchedule must be provided.
+      `Update cache settings on an existing cache in the Peaka project. This endpoint replaces — not merges — the schedules, so both incrementalSchedule and fullRefreshSchedule must be supplied with the full intended state every call. Schedule expressions use ISO-8601 durations (e.g. PT6H, P1D, P7D, P30D).
 
     ${PROJECT_ID_HINT}`,
     parameters: z.object({
@@ -21,41 +20,28 @@ export const registerUpdateCacheTool: ToolRegister = (server) => {
         ),
       incrementalSchedule: z
         .string()
-        .optional()
         .describe(
-          "ISO-8601 duration for the incremental refresh schedule, e.g. PT6H, P1D."
+          "ISO-8601 duration for the incremental refresh schedule, e.g. PT6H, P1D. Required — replaces the existing value."
         ),
       fullRefreshSchedule: z
         .string()
-        .optional()
         .describe(
-          "ISO-8601 duration for the full refresh schedule, e.g. P7D, P30D."
+          "ISO-8601 duration for the full refresh schedule, e.g. P7D, P30D. Required — replaces the existing value."
         ),
     }),
     execute: async (args, { log, session }) => {
       try {
-        if (!args.incrementalSchedule && !args.fullRefreshSchedule) {
-          throw new UserError(
-            "Provide at least one of incrementalSchedule or fullRefreshSchedule."
-          );
-        }
-
-        const body: UpdateCacheRequest = {};
-        if (args.incrementalSchedule) {
-          body.incrementalCacheSchedule = {
+        const svc = resolveService(session);
+        const result = await svc.updateCache(args.projectId, args.cacheId, {
+          incrementalCacheSchedule: {
             type: "BASIC",
             expression: args.incrementalSchedule,
-          };
-        }
-        if (args.fullRefreshSchedule) {
-          body.fullRefreshCacheSchedule = {
+          },
+          fullRefreshCacheSchedule: {
             type: "BASIC",
             expression: args.fullRefreshSchedule,
-          };
-        }
-
-        const svc = resolveService(session);
-        const result = await svc.updateCache(args.projectId, args.cacheId, body);
+          },
+        });
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };

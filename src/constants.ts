@@ -106,6 +106,28 @@ export const LIST_QUERIES_URL_TEMPLATE = ({
   projectId: string;
 }) => `data/projects/${projectId}/queries`;
 
+export const CREATE_QUERY_URL_TEMPLATE = ({
+  projectId,
+}: {
+  projectId: string;
+}) => `data/projects/${projectId}/queries`;
+
+export const UPDATE_QUERY_URL_TEMPLATE = ({
+  projectId,
+  queryId,
+}: {
+  projectId: string;
+  queryId: string;
+}) => `data/projects/${projectId}/queries/${queryId}`;
+
+export const DELETE_QUERY_URL_TEMPLATE = ({
+  projectId,
+  queryId,
+}: {
+  projectId: string;
+  queryId: string;
+}) => `data/projects/${projectId}/queries/${queryId}`;
+
 export const EXECUTE_QUERY_URL_TEMPLATE = ({
   projectId,
 }: {
