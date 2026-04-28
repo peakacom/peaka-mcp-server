@@ -84,6 +84,22 @@ export const REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE = ({
   cacheId: string;
 }) => `data/projects/${projectId}/cache/${cacheId}/incrementalUpdate`;
 
+export const UPDATE_CACHE_URL_TEMPLATE = ({
+  projectId,
+  cacheId,
+}: {
+  projectId: string;
+  cacheId: string;
+}) => `data/projects/${projectId}/cache/${cacheId}`;
+
+export const DELETE_CACHE_URL_TEMPLATE = ({
+  projectId,
+  cacheId,
+}: {
+  projectId: string;
+  cacheId: string;
+}) => `data/projects/${projectId}/cache/${cacheId}`;
+
 export const LIST_QUERIES_URL_TEMPLATE = ({
   projectId,
 }: {

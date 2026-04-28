@@ -18,6 +18,8 @@ import {
   CacheStatus,
   RefreshCacheFullResponse,
   RefreshCacheIncrementalResponse,
+  UpdateCacheRequest,
+  DeleteCacheResponse,
   SavedQuery,
   QueryResult,
   TableMetadataResult,
@@ -28,6 +30,8 @@ import {
   GET_CACHE_STATUSES_URL_TEMPLATE,
   REFRESH_CACHE_FULL_URL_TEMPLATE,
   REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE,
+  UPDATE_CACHE_URL_TEMPLATE,
+  DELETE_CACHE_URL_TEMPLATE,
   GET_METADATA_REFRESH_STATUS_URL_TEMPLATE,
   GET_PROJECT_METADATA_URL_TEMPLATE,
   EXECUTE_QUERY_URL_TEMPLATE,
@@ -347,6 +351,53 @@ export class APIService {
 
       const response =
         await this.axiosInstance.post<RefreshCacheIncrementalResponse>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async updateCache(
+    projectId: string,
+    cacheId: string,
+    body: UpdateCacheRequest
+  ): Promise<Cache> {
+    try {
+      const url = UPDATE_CACHE_URL_TEMPLATE({
+        projectId,
+        cacheId,
+      });
+
+      const response = await this.axiosInstance.put<Cache>(url, body);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async deleteCache(
+    projectId: string,
+    cacheId: string
+  ): Promise<DeleteCacheResponse> {
+    try {
+      const url = DELETE_CACHE_URL_TEMPLATE({
+        projectId,
+        cacheId,
+      });
+
+      const response = await this.axiosInstance.delete<DeleteCacheResponse>(
+        url
+      );
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

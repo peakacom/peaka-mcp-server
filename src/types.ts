@@ -187,6 +187,20 @@ export interface RefreshCacheIncrementalResponse {
   message: string;
 }
 
+export interface CacheScheduleInput {
+  type: string;
+  expression: string;
+}
+
+export interface UpdateCacheRequest {
+  incrementalCacheSchedule?: CacheScheduleInput;
+  fullRefreshCacheSchedule?: CacheScheduleInput;
+}
+
+export interface DeleteCacheResponse {
+  ok: boolean;
+}
+
 export interface QuerySchedule {
   expression: string;
   type: string;
