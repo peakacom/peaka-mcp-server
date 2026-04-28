@@ -16,6 +16,7 @@ import {
   TableMetadata,
   Cache,
   CacheStatus,
+  RefreshCacheFullResponse,
   SavedQuery,
   QueryResult,
   TableMetadataResult,
@@ -24,6 +25,7 @@ import {
 import {
   CREATE_CACHE_URL_TEMPLATE,
   GET_CACHE_STATUSES_URL_TEMPLATE,
+  REFRESH_CACHE_FULL_URL_TEMPLATE,
   GET_METADATA_REFRESH_STATUS_URL_TEMPLATE,
   GET_PROJECT_METADATA_URL_TEMPLATE,
   EXECUTE_QUERY_URL_TEMPLATE,
@@ -296,6 +298,30 @@ export class APIService {
       });
 
       const response = await this.axiosInstance.get<CacheStatus[]>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async refreshCacheFull(
+    projectId: string,
+    cacheId: string
+  ): Promise<RefreshCacheFullResponse> {
+    try {
+      const url = REFRESH_CACHE_FULL_URL_TEMPLATE({
+        projectId,
+        cacheId,
+      });
+
+      const response = await this.axiosInstance.post<RefreshCacheFullResponse>(
+        url
+      );
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

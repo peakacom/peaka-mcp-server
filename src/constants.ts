@@ -68,6 +68,14 @@ export const GET_CACHE_STATUSES_URL_TEMPLATE = ({
   projectId: string;
 }) => `data/projects/${projectId}/cache/status`;
 
+export const REFRESH_CACHE_FULL_URL_TEMPLATE = ({
+  projectId,
+  cacheId,
+}: {
+  projectId: string;
+  cacheId: string;
+}) => `data/projects/${projectId}/cache/${cacheId}/fullRefreshUpdate`;
+
 export const LIST_QUERIES_URL_TEMPLATE = ({
   projectId,
 }: {

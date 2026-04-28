@@ -177,6 +177,11 @@ export interface CacheStatus {
   cacheActionLogs: CacheActionLog[];
 }
 
+export interface RefreshCacheFullResponse {
+  status: string;
+  message: string;
+}
+
 export interface QuerySchedule {
   expression: string;
   type: string;
