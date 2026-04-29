@@ -203,6 +203,20 @@ export const LIST_PROJECTS_URL_TEMPLATE = ({
   workspaceId: string;
 }) => `organizations/${organizationId}/workspaces/${workspaceId}/projects`;
 
+export const LIST_CONNECTIONS_URL_TEMPLATE = ({
+  projectId,
+}: {
+  projectId: string;
+}) => `connections/${projectId}`;
+
+export const GET_CONNECTION_DETAIL_URL_TEMPLATE = ({
+  projectId,
+  connectionId,
+}: {
+  projectId: string;
+  connectionId: string;
+}) => `connections/${projectId}/${connectionId}/detail`;
+
 export const PEAKA_SQL_RULE_SET = `Double check the Trino SQL query above for common mistakes, including:
  -  Include catalog and schema prefices in your queries and wrap catalog and schema prefices with double quotes. Use table aliases. Wrap table names with double quotations if it contains spaces.
  -  Use single quotes for varchar columns.

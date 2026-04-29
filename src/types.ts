@@ -258,6 +258,15 @@ export interface TableStatistics {
   columnStatistics: ColumnStatistics[];
 }
 
+export interface Connection {
+  id: string;
+  name: string;
+  type: string;
+  url?: string;
+}
+
+export type ConnectionDetail = { type: string } & Record<string, unknown>;
+
 export interface QueryResultColumn {
   catalogId: string;
   catalogName: string;

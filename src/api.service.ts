@@ -18,6 +18,8 @@ import {
   CacheStatus,
   CatalogRelations,
   TableStatistics,
+  Connection,
+  ConnectionDetail,
   CreateCacheRequest,
   CreateCacheBatchRequest,
   RefreshCacheFullResponse,
@@ -54,6 +56,8 @@ import {
   LIST_COLUMNS_URL_TEMPLATE,
   LIST_ORGANIZATIONS_URL,
   LIST_PROJECTS_URL_TEMPLATE,
+  LIST_CONNECTIONS_URL_TEMPLATE,
+  GET_CONNECTION_DETAIL_URL_TEMPLATE,
   LIST_SCHEMAS_URL_TEMPLATE,
   LIST_TABLES_URL_TEMPLATE,
   LIST_WORKSPACES_URL_TEMPLATE,
@@ -747,9 +751,49 @@ export class APIService {
         schemaName,
         tableName,
       });
-    
+
     try {
       const response = await this.axiosInstance.get<TableStatistics>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async listConnections(projectId: string): Promise<Connection[]> {
+    try {
+      const url = LIST_CONNECTIONS_URL_TEMPLATE({
+        projectId,
+      });
+
+      const response = await this.axiosInstance.get<Connection[]>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async getConnectionDetail(
+    projectId: string,
+    connectionId: string
+  ): Promise<ConnectionDetail> {
+    try {
+      const url = GET_CONNECTION_DETAIL_URL_TEMPLATE({
+        projectId,
+        connectionId,
+      });
+
+      const response = await this.axiosInstance.get<ConnectionDetail>(url);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
