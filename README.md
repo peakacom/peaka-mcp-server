@@ -35,14 +35,38 @@ Every project-scoped tool takes a `projectId` argument. If the MCP client does n
   - List all available tables for a given catalog and schema in the Peaka project.
 - `peaka_list_columns`
   - List all columns for a given table in the Peaka project. Returns column names, data types, and constraints.
+- `peaka_get_relations`
+  - Get table relationships (foreign keys) for a catalog. Useful for constructing accurate JOINs.
+- `peaka_get_table_statistics`
+  - Get column-level statistics for a table, including distinct-value fractions per column.
 - `peaka_create_cache`
   - Create a cache for a table in the Peaka project. Caching a table improves query performance by storing the data locally.
+- `peaka_create_cache_batch`
+  - Create caches for multiple tables in a single call. Preferred over repeated `peaka_create_cache` calls.
 - `peaka_get_cache_statuses`
   - Get all cache statuses for tables in the Peaka project, including current caching state, execution history, and progress.
+- `peaka_refresh_cache_full`
+  - Trigger a full refresh on an existing cache.
+- `peaka_refresh_cache_incremental`
+  - Trigger an incremental update on an existing cache, fetching only new or changed rows.
+- `peaka_update_cache`
+  - Update cache settings (schedules) on an existing cache. Replaces both schedules entirely each call.
+- `peaka_delete_cache`
+  - Delete an existing cache; the underlying table is not affected.
 - `peaka_list_queries`
   - List all saved queries in the Peaka project. Returns query names, SQL content, and whether they are plain or materialized.
 - `peaka_execute_query`
   - Execute a saved query by its ID in the Peaka project.
+- `peaka_create_query`
+  - Create a named, saved query in the project's semantic layer. Returns the created query including its ID.
+- `peaka_update_query`
+  - Update an existing saved query's display name and/or SQL body.
+- `peaka_delete_query`
+  - Delete a saved query from the Peaka project.
+- `peaka_list_connections`
+  - List all data source connections in the Peaka project, including each connection's id, name, and type.
+- `peaka_get_connection_detail`
+  - Get connection-specific configuration detail for a data source connection.
 - `peaka_refresh_project_metadata`
   - Refresh project metadata for a specific catalog. Long-running; triggers the refresh and polls for completion.
 - `peaka_get_metadata_refresh_status`

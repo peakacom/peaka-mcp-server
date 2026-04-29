@@ -62,17 +62,77 @@ export const CREATE_CACHE_URL_TEMPLATE = ({
   projectId: string;
 }) => `data/projects/${projectId}/cache`;
 
+export const CREATE_CACHE_BATCH_URL_TEMPLATE = ({
+  projectId,
+}: {
+  projectId: string;
+}) => `data/projects/${projectId}/cache/batch`;
+
 export const GET_CACHE_STATUSES_URL_TEMPLATE = ({
   projectId,
 }: {
   projectId: string;
 }) => `data/projects/${projectId}/cache/status`;
 
+export const REFRESH_CACHE_FULL_URL_TEMPLATE = ({
+  projectId,
+  cacheId,
+}: {
+  projectId: string;
+  cacheId: string;
+}) => `data/projects/${projectId}/cache/${cacheId}/fullRefreshUpdate`;
+
+export const REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE = ({
+  projectId,
+  cacheId,
+}: {
+  projectId: string;
+  cacheId: string;
+}) => `data/projects/${projectId}/cache/${cacheId}/incrementalUpdate`;
+
+export const UPDATE_CACHE_URL_TEMPLATE = ({
+  projectId,
+  cacheId,
+}: {
+  projectId: string;
+  cacheId: string;
+}) => `data/projects/${projectId}/cache/${cacheId}`;
+
+export const DELETE_CACHE_URL_TEMPLATE = ({
+  projectId,
+  cacheId,
+}: {
+  projectId: string;
+  cacheId: string;
+}) => `data/projects/${projectId}/cache/${cacheId}`;
+
 export const LIST_QUERIES_URL_TEMPLATE = ({
   projectId,
 }: {
   projectId: string;
 }) => `data/projects/${projectId}/queries`;
+
+export const CREATE_QUERY_URL_TEMPLATE = ({
+  projectId,
+}: {
+  projectId: string;
+}) => `data/projects/${projectId}/queries`;
+
+export const UPDATE_QUERY_URL_TEMPLATE = ({
+  projectId,
+  queryId,
+}: {
+  projectId: string;
+  queryId: string;
+}) => `data/projects/${projectId}/queries/${queryId}`;
+
+export const DELETE_QUERY_URL_TEMPLATE = ({
+  projectId,
+  queryId,
+}: {
+  projectId: string;
+  queryId: string;
+}) => `data/projects/${projectId}/queries/${queryId}`;
 
 export const EXECUTE_QUERY_URL_TEMPLATE = ({
   projectId,
@@ -100,6 +160,27 @@ export const GET_METADATA_REFRESH_STATUS_URL_TEMPLATE = ({
   catalogId: string;
 }) => `metadata/${projectId}/refresh/${catalogId}`;
 
+export const GET_RELATIONS_URL_TEMPLATE = ({
+  projectId,
+  catalogId,
+}: {
+  projectId: string;
+  catalogId: string;
+}) => `metadata/${projectId}/relations/${catalogId}`;
+
+export const GET_TABLE_STATISTICS_URL_TEMPLATE = ({
+  projectId,
+  catalogId,
+  schemaName,
+  tableName,
+}: {
+  projectId: string;
+  catalogId: string;
+  schemaName: string;
+  tableName: string;
+}) =>
+  `data/projects/${projectId}/catalogs/${catalogId}/schemas/${schemaName}/tables/${tableName}/statistics`;
+
 export const TRANSPILE_TRINO_SQL_URL_TEMPLATE = ({
   dialect,
 }: {
@@ -121,6 +202,20 @@ export const LIST_PROJECTS_URL_TEMPLATE = ({
   organizationId: string;
   workspaceId: string;
 }) => `organizations/${organizationId}/workspaces/${workspaceId}/projects`;
+
+export const LIST_CONNECTIONS_URL_TEMPLATE = ({
+  projectId,
+}: {
+  projectId: string;
+}) => `connections/${projectId}`;
+
+export const GET_CONNECTION_DETAIL_URL_TEMPLATE = ({
+  projectId,
+  connectionId,
+}: {
+  projectId: string;
+  connectionId: string;
+}) => `connections/${projectId}/${connectionId}/detail`;
 
 export const PEAKA_SQL_RULE_SET = `Double check the Trino SQL query above for common mistakes, including:
  -  Include catalog and schema prefices in your queries and wrap catalog and schema prefices with double quotes. Use table aliases. Wrap table names with double quotations if it contains spaces.

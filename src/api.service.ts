@@ -16,23 +16,48 @@ import {
   TableMetadata,
   Cache,
   CacheStatus,
+  CatalogRelations,
+  TableStatistics,
+  Connection,
+  ConnectionDetail,
+  CreateCacheRequest,
+  CreateCacheBatchRequest,
+  RefreshCacheFullResponse,
+  RefreshCacheIncrementalResponse,
+  UpdateCacheRequest,
+  DeleteCacheResponse,
   SavedQuery,
+  CreateQueryRequest,
+  UpdateQueryRequest,
+  DeleteQueryResponse,
   QueryResult,
   TableMetadataResult,
   Workspace,
 } from "./types";
 import {
   CREATE_CACHE_URL_TEMPLATE,
+  CREATE_CACHE_BATCH_URL_TEMPLATE,
   GET_CACHE_STATUSES_URL_TEMPLATE,
+  REFRESH_CACHE_FULL_URL_TEMPLATE,
+  REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE,
+  UPDATE_CACHE_URL_TEMPLATE,
+  DELETE_CACHE_URL_TEMPLATE,
   GET_METADATA_REFRESH_STATUS_URL_TEMPLATE,
   GET_PROJECT_METADATA_URL_TEMPLATE,
+  GET_RELATIONS_URL_TEMPLATE,
+  GET_TABLE_STATISTICS_URL_TEMPLATE,
   EXECUTE_QUERY_URL_TEMPLATE,
   LIST_QUERIES_URL_TEMPLATE,
+  CREATE_QUERY_URL_TEMPLATE,
+  UPDATE_QUERY_URL_TEMPLATE,
+  DELETE_QUERY_URL_TEMPLATE,
   DEFAULT_PEAKA_PARTNER_API_BASE_URL,
   LIST_CATALOGS_URL_TEMPLATE,
   LIST_COLUMNS_URL_TEMPLATE,
   LIST_ORGANIZATIONS_URL,
   LIST_PROJECTS_URL_TEMPLATE,
+  LIST_CONNECTIONS_URL_TEMPLATE,
+  GET_CONNECTION_DETAIL_URL_TEMPLATE,
   LIST_SCHEMAS_URL_TEMPLATE,
   LIST_TABLES_URL_TEMPLATE,
   LIST_WORKSPACES_URL_TEMPLATE,
@@ -264,20 +289,35 @@ export class APIService {
 
   public async createCache(
     projectId: string,
-    catalogId: string,
-    schemaName: string,
-    tableName: string
+    body: CreateCacheRequest
   ): Promise<Cache> {
     try {
       const url = CREATE_CACHE_URL_TEMPLATE({
         projectId,
       });
 
-      const response = await this.axiosInstance.post<Cache>(url, {
-        catalogId,
-        schemaName,
-        tableName,
+      const response = await this.axiosInstance.post<Cache>(url, body);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async createCacheBatch(
+    projectId: string,
+    body: CreateCacheBatchRequest
+  ): Promise<Cache[]> {
+    try {
+      const url = CREATE_CACHE_BATCH_URL_TEMPLATE({
+        projectId,
       });
+
+      const response = await this.axiosInstance.post<Cache[]>(url, body);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -307,6 +347,100 @@ export class APIService {
     }
   }
 
+  public async refreshCacheFull(
+    projectId: string,
+    cacheId: string
+  ): Promise<RefreshCacheFullResponse> {
+    try {
+      const url = REFRESH_CACHE_FULL_URL_TEMPLATE({
+        projectId,
+        cacheId,
+      });
+
+      const response = await this.axiosInstance.post<RefreshCacheFullResponse>(
+        url
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async refreshCacheIncremental(
+    projectId: string,
+    cacheId: string
+  ): Promise<RefreshCacheIncrementalResponse> {
+    try {
+      const url = REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE({
+        projectId,
+        cacheId,
+      });
+
+      const response =
+        await this.axiosInstance.post<RefreshCacheIncrementalResponse>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async updateCache(
+    projectId: string,
+    cacheId: string,
+    body: UpdateCacheRequest
+  ): Promise<Cache> {
+    try {
+      const url = UPDATE_CACHE_URL_TEMPLATE({
+        projectId,
+        cacheId,
+      });
+
+      const response = await this.axiosInstance.put<Cache>(url, body);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async deleteCache(
+    projectId: string,
+    cacheId: string
+  ): Promise<DeleteCacheResponse> {
+    try {
+      const url = DELETE_CACHE_URL_TEMPLATE({
+        projectId,
+        cacheId,
+      });
+
+      const response = await this.axiosInstance.delete<DeleteCacheResponse>(
+        url
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
   public async listQueries(projectId: string): Promise<SavedQuery[]> {
     try {
       const url = LIST_QUERIES_URL_TEMPLATE({
@@ -314,6 +448,74 @@ export class APIService {
       });
 
       const response = await this.axiosInstance.get<SavedQuery[]>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async createQuery(
+    projectId: string,
+    body: CreateQueryRequest
+  ): Promise<SavedQuery> {
+    try {
+      const url = CREATE_QUERY_URL_TEMPLATE({
+        projectId,
+      });
+
+      const response = await this.axiosInstance.post<SavedQuery>(url, body);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async updateQuery(
+    projectId: string,
+    queryId: string,
+    body: UpdateQueryRequest
+  ): Promise<SavedQuery> {
+    try {
+      const url = UPDATE_QUERY_URL_TEMPLATE({
+        projectId,
+        queryId,
+      });
+
+      const response = await this.axiosInstance.put<SavedQuery>(url, body);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async deleteQuery(
+    projectId: string,
+    queryId: string
+  ): Promise<DeleteQueryResponse> {
+    try {
+      const url = DELETE_QUERY_URL_TEMPLATE({
+        projectId,
+        queryId,
+      });
+
+      const response = await this.axiosInstance.delete<DeleteQueryResponse>(
+        url
+      );
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -504,6 +706,94 @@ export class APIService {
 
       const response =
         await this.axiosInstance.get<MetadataRefreshStatusResponse>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async getRelations(
+    projectId: string,
+    catalogId: string
+  ): Promise<CatalogRelations> {
+    try {
+      const url = GET_RELATIONS_URL_TEMPLATE({
+        projectId,
+        catalogId,
+      });
+
+      const response = await this.axiosInstance.get<CatalogRelations>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async getTableStatistics(
+    projectId: string,
+    catalogId: string,
+    schemaName: string,
+    tableName: string
+  ): Promise<TableStatistics> {
+    const url = GET_TABLE_STATISTICS_URL_TEMPLATE({
+        projectId,
+        catalogId,
+        schemaName,
+        tableName,
+      });
+
+    try {
+      const response = await this.axiosInstance.get<TableStatistics>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async listConnections(projectId: string): Promise<Connection[]> {
+    try {
+      const url = LIST_CONNECTIONS_URL_TEMPLATE({
+        projectId,
+      });
+
+      const response = await this.axiosInstance.get<Connection[]>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async getConnectionDetail(
+    projectId: string,
+    connectionId: string
+  ): Promise<ConnectionDetail> {
+    try {
+      const url = GET_CONNECTION_DETAIL_URL_TEMPLATE({
+        projectId,
+        connectionId,
+      });
+
+      const response = await this.axiosInstance.get<ConnectionDetail>(url);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

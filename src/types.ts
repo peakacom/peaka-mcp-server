@@ -177,6 +177,40 @@ export interface CacheStatus {
   cacheActionLogs: CacheActionLog[];
 }
 
+export interface RefreshCacheFullResponse {
+  status: string;
+  message: string;
+}
+
+export interface RefreshCacheIncrementalResponse {
+  status: string;
+  message: string;
+}
+
+export interface CacheScheduleInput {
+  type: string;
+  expression: string;
+}
+
+export interface CreateCacheRequest {
+  catalogId: string;
+  schemaName: string;
+  tableName: string;
+  incrementalCacheSchedule?: CacheScheduleInput;
+  fullRefreshCacheSchedule?: CacheScheduleInput;
+}
+
+export type CreateCacheBatchRequest = CreateCacheRequest[];
+
+export interface UpdateCacheRequest {
+  incrementalCacheSchedule: CacheScheduleInput;
+  fullRefreshCacheSchedule: CacheScheduleInput;
+}
+
+export interface DeleteCacheResponse {
+  ok: boolean;
+}
+
 export interface QuerySchedule {
   expression: string;
   type: string;
@@ -191,6 +225,47 @@ export interface SavedQuery {
   queryType: string;
   schedule: QuerySchedule | null;
 }
+
+export type SavedQueryType = "PLAIN" | "MATERIALIZED";
+
+export interface CreateQueryRequest {
+  displayName: string;
+  inputQuery: string;
+  queryType: SavedQueryType;
+}
+
+export interface UpdateQueryRequest {
+  displayName?: string;
+  inputQuery?: string;
+  queryType?: SavedQueryType;
+}
+
+export interface DeleteQueryResponse {
+  ok: boolean;
+}
+
+export type CatalogRelations = Record<string, Record<string, unknown>>;
+
+export interface ColumnStatistics {
+  columnName: string;
+  distinctFraction: number;
+}
+
+export interface TableStatistics {
+  catalogId: string;
+  schemaName: string;
+  tableName: string;
+  columnStatistics: ColumnStatistics[];
+}
+
+export interface Connection {
+  id: string;
+  name: string;
+  type: string;
+  url?: string;
+}
+
+export type ConnectionDetail = { type: string } & Record<string, unknown>;
 
 export interface QueryResultColumn {
   catalogId: string;
