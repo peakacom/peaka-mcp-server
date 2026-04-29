@@ -11,6 +11,11 @@ export const registerUpdateCacheTool: ToolRegister = (server) => {
       `Update cache settings on an existing cache in the Peaka project. This endpoint replaces — not merges — the schedules, so both incrementalSchedule and fullRefreshSchedule must be supplied with the full intended state every call. Schedule expressions use ISO-8601 durations (e.g. PT6H, P1D, P7D, P30D).
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       cacheId: z

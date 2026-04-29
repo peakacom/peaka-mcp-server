@@ -8,6 +8,9 @@ export const registerListProjectsTool: ToolRegister = (server) => {
     name: "peaka_list_projects",
     description:
       "List all projects accessible for the user. Use this tool to discover projectIds, then pass the chosen projectId to subsequent tool calls.",
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({}),
     execute: async (_, { log, session }) => {
       try {

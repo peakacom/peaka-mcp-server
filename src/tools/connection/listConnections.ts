@@ -12,6 +12,9 @@ export const registerListConnectionsTool: ToolRegister = (server) => {
       `List all data source connections in the Peaka project. Returns each connection's id, name, type, and (for OAuth-based connections) callback URL. Useful for discovering what data sources are wired up; pair with peaka_get_connection_detail for connection-specific configuration.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
     }),

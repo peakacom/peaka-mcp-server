@@ -12,6 +12,9 @@ export const registerGetTableStatisticsTool: ToolRegister = (server) => {
       `Get column-level statistics for a table in the Peaka project. Returns the catalog/schema/table identifiers and a per-column distinctFraction (estimated fraction of distinct values vs total rows), useful for cardinality estimation and query optimization.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z.string(),

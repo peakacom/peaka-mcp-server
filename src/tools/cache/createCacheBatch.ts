@@ -12,6 +12,10 @@ export const registerCreateCacheBatchTool: ToolRegister = (server) => {
       `Create caches for multiple tables in a single call. Use this instead of repeated peaka_create_cache calls when caching many tables — it avoids partial-failure states where some caches are created and others aren't. Each item supports the same optional schedule expressions as peaka_create_cache (ISO-8601 durations, e.g. PT6H, P1D, P7D, P30D).
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       items: z

@@ -11,6 +11,9 @@ export const registerGetRelationsTool: ToolRegister = (server) => {
       `Get table relationships (foreign keys) for a catalog in the Peaka project. Useful for understanding how tables connect when constructing JOINs — without this, JOIN conditions have to be guessed from column-name similarity. The response is an open-ended object map keyed by relation identifier.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z

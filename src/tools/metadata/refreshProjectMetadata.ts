@@ -11,6 +11,10 @@ export const registerRefreshProjectMetadataTool: ToolRegister = (server) => {
       `Refresh project metadata for a specific catalog. This is a long-running operation that should only be used when a data source has structurally changed (e.g. new tables or columns added). Triggers the refresh and polls for completion, returning the final status.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z

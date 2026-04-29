@@ -11,6 +11,9 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
       `Get metadata for all catalogs, schemas, and tables in the Peaka project in a single call. Optionally filter by catalogId and/or schemaName. Use this tool to discover the data structure before writing queries.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z

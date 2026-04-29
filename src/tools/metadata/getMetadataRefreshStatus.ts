@@ -11,6 +11,9 @@ export const registerGetMetadataRefreshStatusTool: ToolRegister = (server) => {
       `Check the current status of a metadata refresh job for a specific catalog. Possible statuses: NOT_ACTIVE, COMPLETED, WAITING, ACTIVE, DELAYED, FAILED, PAUSED, STUCK.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z

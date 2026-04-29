@@ -11,6 +11,10 @@ export const registerRefreshCacheFullTool: ToolRegister = (server) => {
       `Trigger a full refresh on an existing cache in the Peaka project. Use the cacheId returned from peaka_get_cache_statuses.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       cacheId: z

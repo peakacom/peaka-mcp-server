@@ -54,12 +54,44 @@
       "description": "Execute a saved query by its ID in a Peaka project. Requires projectId. Use peaka_list_queries to find available query IDs."
     },
     {
+      "name": "peaka_create_query",
+      "description": "Create a named, saved query in a Peaka project's semantic layer. Requires projectId. Returns the created query object including its ID."
+    },
+    {
+      "name": "peaka_update_query",
+      "description": "Update an existing saved query's display name and/or SQL body. Requires projectId. Use peaka_list_queries to find available query IDs."
+    },
+    {
+      "name": "peaka_delete_query",
+      "description": "Delete a saved query from a Peaka project. Requires projectId. Use peaka_list_queries to find available query IDs."
+    },
+    {
       "name": "peaka_create_cache",
       "description": "Create a cache for a table in a Peaka project. Requires projectId. Caching a table improves query performance by storing the data locally."
     },
     {
+      "name": "peaka_create_cache_batch",
+      "description": "Create caches for multiple tables in a single call. Requires projectId. Supports optional schedule expressions (ISO-8601 durations). Preferred over repeated peaka_create_cache calls."
+    },
+    {
       "name": "peaka_get_cache_statuses",
       "description": "Get all cache statuses for tables in a Peaka project. Requires projectId. Returns the current caching state, execution history, and progress for each cached table."
+    },
+    {
+      "name": "peaka_refresh_cache_full",
+      "description": "Trigger a full refresh on an existing cache. Requires projectId. Use the cacheId from peaka_get_cache_statuses."
+    },
+    {
+      "name": "peaka_refresh_cache_incremental",
+      "description": "Trigger an incremental update on an existing cache, fetching only new or changed rows. Requires projectId. Use the cacheId from peaka_get_cache_statuses."
+    },
+    {
+      "name": "peaka_update_cache",
+      "description": "Update cache schedule settings on an existing cache. Requires projectId. Replaces both incremental and full-refresh schedules entirely each call."
+    },
+    {
+      "name": "peaka_delete_cache",
+      "description": "Delete an existing cache; the underlying table is not affected. Requires projectId. Use the cacheId from peaka_get_cache_statuses."
     },
     {
       "name": "peaka_list_catalogs",
@@ -76,6 +108,22 @@
     {
       "name": "peaka_list_columns",
       "description": "List all columns for a given table in a Peaka project. Requires projectId. Returns column names, data types, and constraints. Use peaka_get_project_metadata first to discover available catalogs, schemas, and tables."
+    },
+    {
+      "name": "peaka_get_relations",
+      "description": "Get table relationships (foreign keys) for a catalog. Requires projectId. Useful for constructing accurate JOINs."
+    },
+    {
+      "name": "peaka_get_table_statistics",
+      "description": "Get column-level statistics for a table, including distinct-value fractions. Requires projectId. Useful for cardinality estimation and query optimization."
+    },
+    {
+      "name": "peaka_list_connections",
+      "description": "List all data source connections in a Peaka project. Requires projectId. Returns each connection's id, name, and type."
+    },
+    {
+      "name": "peaka_get_connection_detail",
+      "description": "Get connection-specific configuration detail for a data source. Requires projectId. Use peaka_list_connections to discover connection IDs."
     },
     {
       "name": "peaka_refresh_project_metadata",

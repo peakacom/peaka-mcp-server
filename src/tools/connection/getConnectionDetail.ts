@@ -12,6 +12,9 @@ export const registerGetConnectionDetailTool: ToolRegister = (server) => {
       `Get connection-specific configuration detail for a data source connection in the Peaka project. The response shape varies by connection type — only the \`type\` field is guaranteed; remaining fields are connection-specific. Use peaka_list_connections to discover the connectionId.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       connectionId: z

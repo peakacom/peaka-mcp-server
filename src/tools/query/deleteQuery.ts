@@ -11,6 +11,10 @@ export const registerDeleteQueryTool: ToolRegister = (server) => {
       `Delete a saved query from the Peaka project. Use the queryId returned from peaka_list_queries.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       queryId: z

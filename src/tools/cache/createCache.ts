@@ -12,6 +12,10 @@ export const registerCreateCacheTool: ToolRegister = (server) => {
       `Create a cache for a table in the Peaka project. Caching a table improves query performance by storing the data locally. Schedule expressions are optional at creation time and use ISO-8601 durations (e.g. PT6H, P1D, P7D, P30D); they can be set later with peaka_update_cache.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z.string(),

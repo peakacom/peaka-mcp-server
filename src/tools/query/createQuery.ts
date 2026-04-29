@@ -11,6 +11,10 @@ export const registerCreateQueryTool: ToolRegister = (server) => {
       `Create a named, saved query in the Peaka project's semantic layer. Returns the created query object including its ID, which can be passed to peaka_execute_query.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       displayName: z

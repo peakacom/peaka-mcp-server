@@ -11,6 +11,9 @@ export const registerListCatalogsTool: ToolRegister = (server) => {
       `List all available catalogs in the Peaka project. Returns catalog names, types, and connection info.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
     }),

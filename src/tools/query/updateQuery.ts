@@ -12,6 +12,11 @@ export const registerUpdateQueryTool: ToolRegister = (server) => {
       `Update an existing saved query in the Peaka project. Adjusts the display name and/or SQL body. At least one of displayName or inputQuery must be provided.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       queryId: z

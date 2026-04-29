@@ -11,6 +11,9 @@ export const registerListQueriesTool: ToolRegister = (server) => {
       `List all saved queries in the Peaka project. Returns query names, SQL content, and whether they are plain or materialized.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
     }),

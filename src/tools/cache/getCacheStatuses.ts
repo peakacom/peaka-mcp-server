@@ -11,6 +11,9 @@ export const registerGetCacheStatusesTool: ToolRegister = (server) => {
       `Get all cache statuses for tables in the Peaka project. Returns the current caching state, execution history, and progress for each cached table.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
     }),

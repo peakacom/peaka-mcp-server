@@ -13,6 +13,9 @@ export const registerQueryGoldenSqlsTool: ToolRegister = (server) => {
     Otherwise use the other tools to figure out the tables and write the query.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       query: z.string(),

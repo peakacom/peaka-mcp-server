@@ -11,6 +11,10 @@ export const registerDeleteCacheTool: ToolRegister = (server) => {
       `Delete an existing cache in the Peaka project. Removes the cache entirely; the underlying table is not affected. Use the cacheId returned from peaka_get_cache_statuses.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       cacheId: z

@@ -11,6 +11,9 @@ export const registerListSchemasTool: ToolRegister = (server) => {
       `List all available schemas for a given catalog in the Peaka project.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      readOnlyHint: true,
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z.string(),
