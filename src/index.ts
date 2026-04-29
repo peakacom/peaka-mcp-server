@@ -9,6 +9,7 @@ import {
   registerMetadataTools,
   registerCacheTools,
   registerListTools,
+  registerTableTools,
 } from "./tools";
 
 const mode = getMode();
@@ -57,6 +58,7 @@ registerQueryTools(server);
 registerMetadataTools(server);
 registerCacheTools(server);
 registerListTools(server);
+registerTableTools(server);
 
 server.addResource({
   uri: "file:///peaka_sql_query_rule_set.txt",

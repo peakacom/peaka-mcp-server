@@ -244,6 +244,20 @@ export interface DeleteQueryResponse {
   ok: boolean;
 }
 
+export type CatalogRelations = Record<string, Record<string, unknown>>;
+
+export interface ColumnStatistics {
+  columnName: string;
+  distinctFraction: number;
+}
+
+export interface TableStatistics {
+  catalogId: string;
+  schemaName: string;
+  tableName: string;
+  columnStatistics: ColumnStatistics[];
+}
+
 export interface QueryResultColumn {
   catalogId: string;
   catalogName: string;

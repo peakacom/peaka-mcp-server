@@ -160,6 +160,27 @@ export const GET_METADATA_REFRESH_STATUS_URL_TEMPLATE = ({
   catalogId: string;
 }) => `metadata/${projectId}/refresh/${catalogId}`;
 
+export const GET_RELATIONS_URL_TEMPLATE = ({
+  projectId,
+  catalogId,
+}: {
+  projectId: string;
+  catalogId: string;
+}) => `metadata/${projectId}/relations/${catalogId}`;
+
+export const GET_TABLE_STATISTICS_URL_TEMPLATE = ({
+  projectId,
+  catalogId,
+  schemaName,
+  tableName,
+}: {
+  projectId: string;
+  catalogId: string;
+  schemaName: string;
+  tableName: string;
+}) =>
+  `data/projects/${projectId}/catalogs/${catalogId}/schemas/${schemaName}/tables/${tableName}/statistics`;
+
 export const TRANSPILE_TRINO_SQL_URL_TEMPLATE = ({
   dialect,
 }: {

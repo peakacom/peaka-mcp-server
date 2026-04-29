@@ -16,6 +16,8 @@ import {
   TableMetadata,
   Cache,
   CacheStatus,
+  CatalogRelations,
+  TableStatistics,
   CreateCacheRequest,
   CreateCacheBatchRequest,
   RefreshCacheFullResponse,
@@ -40,6 +42,8 @@ import {
   DELETE_CACHE_URL_TEMPLATE,
   GET_METADATA_REFRESH_STATUS_URL_TEMPLATE,
   GET_PROJECT_METADATA_URL_TEMPLATE,
+  GET_RELATIONS_URL_TEMPLATE,
+  GET_TABLE_STATISTICS_URL_TEMPLATE,
   EXECUTE_QUERY_URL_TEMPLATE,
   LIST_QUERIES_URL_TEMPLATE,
   CREATE_QUERY_URL_TEMPLATE,
@@ -698,6 +702,54 @@ export class APIService {
 
       const response =
         await this.axiosInstance.get<MetadataRefreshStatusResponse>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async getRelations(
+    projectId: string,
+    catalogId: string
+  ): Promise<CatalogRelations> {
+    try {
+      const url = GET_RELATIONS_URL_TEMPLATE({
+        projectId,
+        catalogId,
+      });
+
+      const response = await this.axiosInstance.get<CatalogRelations>(url);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid API Key.");
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async getTableStatistics(
+    projectId: string,
+    catalogId: string,
+    schemaName: string,
+    tableName: string
+  ): Promise<TableStatistics> {
+    const url = GET_TABLE_STATISTICS_URL_TEMPLATE({
+        projectId,
+        catalogId,
+        schemaName,
+        tableName,
+      });
+    
+    try {
+      const response = await this.axiosInstance.get<TableStatistics>(url);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
