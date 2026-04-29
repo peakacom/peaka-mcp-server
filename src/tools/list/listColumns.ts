@@ -1,5 +1,6 @@
 import { UserError } from "fastmcp";
 import { z } from "zod";
+import axios from "axios";
 import { resolveService } from "../../context";
 import { PROJECT_ID_HINT } from "../shared";
 import type { ToolRegister } from "../types";
@@ -33,8 +34,12 @@ export const registerListColumnsTool: ToolRegister = (server) => {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
       } catch (error) {
-        if (error instanceof UserError) throw error;
-        log.error("Error listing columns", JSON.stringify(error));
+        if (error instanceof UserError) {
+          throw error;
+        }
+        if (axios.isAxiosError(error)) {
+          log.error(error.message);
+        }
       }
     },
   });

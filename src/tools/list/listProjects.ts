@@ -1,5 +1,6 @@
 import { UserError } from "fastmcp";
 import { z } from "zod";
+import axios from "axios";
 import { resolveService } from "../../context";
 import type { ToolRegister } from "../types";
 
@@ -49,8 +50,12 @@ export const registerListProjectsTool: ToolRegister = (server) => {
           ],
         };
       } catch (error) {
-        if (error instanceof UserError) throw error;
-        log.error("Error listing projects", JSON.stringify(error));
+        if (error instanceof UserError) {
+          throw error;
+        }
+        if (axios.isAxiosError(error)) {
+          log.error(error.message);
+        }
       }
     },
   });

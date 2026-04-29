@@ -1,5 +1,6 @@
 import { UserError } from "fastmcp";
 import { z } from "zod";
+import axios from "axios";
 import { resolveService } from "../../context";
 import { PROJECT_ID_HINT, filterMetadataResponse } from "../shared";
 import type { ToolRegister } from "../types";
@@ -42,8 +43,12 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
           ],
         };
       } catch (error) {
-        if (error instanceof UserError) throw error;
-        log.error("Error getting project metadata", JSON.stringify(error));
+        if (error instanceof UserError) {
+          throw error;
+        }
+        if (axios.isAxiosError(error)) {
+          log.error(error.message);
+        }
       }
     },
   });
