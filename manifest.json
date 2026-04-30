@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "peaka-mcp-server",
   "display_name": "Peaka",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "MCP server for querying Peaka data using natural language and SQL",
   "author": {
     "name": "Peaka"
