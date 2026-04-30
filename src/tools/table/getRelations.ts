@@ -4,6 +4,7 @@ import axios from "axios";
 import { resolveService } from "../../context";
 import { PROJECT_ID_HINT } from "../shared";
 import type { ToolRegister } from "../types";
+import { handleToolError } from "../../error";
 
 export const registerGetRelationsTool: ToolRegister = (server) => {
   server.addTool({
@@ -29,12 +30,7 @@ export const registerGetRelationsTool: ToolRegister = (server) => {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
       } catch (error) {
-        if (error instanceof UserError) {
-          throw error;
-        }
-        if (axios.isAxiosError(error)) {
-          log.error(error.message);
-        }
+        return handleToolError(error, log);
       }
     },
   });
