@@ -94,77 +94,48 @@ export class APIService {
   }
 
   public async getProjectInfo(): Promise<ProjectInfoResponse> {
-    try {
-      const response = await this.axiosInstance.get<ProjectInfoResponse>(
-        "info"
-      );
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<ProjectInfoResponse>("info");
+    return response.data;
   }
 
   public async queryForGoldenSqls(
     projectId: string,
     query: string
   ): Promise<GoldenSqlResult> {
-    try {
-      const url = QUERY_GOLDEN_SQL_URL_TEMPLATE({
-        projectId,
-        query: encodeURI(query),
-      });
+    const url = QUERY_GOLDEN_SQL_URL_TEMPLATE({
+      projectId,
+      query: encodeURI(query),
+    });
 
-      const response = await this.axiosInstance.get<GoldenSqlResult>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<GoldenSqlResult>(url);
+    return response.data;
   }
 
   public async queryForMetadata(
     projectId: string,
     tableNames: string[]
   ): Promise<TableMetadata[]> {
-    try {
-      const apiCalls: Promise<AxiosResponse>[] = [];
-      for (const tableName of tableNames) {
-        const url = QUERY_TABLE_METADATA_URL_TEMPLATE({
-          projectId,
-          tableName: encodeURI(tableName),
-        });
-        apiCalls.push(this.axiosInstance.get<TableMetadataResult>(url));
-      }
-
-      const apiResults = await Promise.all(apiCalls);
-
-      let result: TableMetadata[] = [];
-      for (const apiResult of apiResults) {
-        const apiResultData = apiResult.data as TableMetadataResult;
-        apiResultData.result.forEach((tableMetadata) => {
-          tableMetadata.fullTableNameToBeUsedInSQLQueries = `"${tableMetadata.catalogQueryName}"."${tableMetadata.schemaName}"."${tableMetadata.tableName}"`;
-        });
-        result = [...result, ...apiResultData.result];
-      }
-
-      return result;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
+    const apiCalls: Promise<AxiosResponse>[] = [];
+    for (const tableName of tableNames) {
+      const url = QUERY_TABLE_METADATA_URL_TEMPLATE({
+        projectId,
+        tableName: encodeURI(tableName),
+      });
+      apiCalls.push(this.axiosInstance.get<TableMetadataResult>(url));
     }
+
+    const apiResults = await Promise.all(apiCalls);
+
+    let result: TableMetadata[] = [];
+    for (const apiResult of apiResults) {
+      const apiResultData = apiResult.data as TableMetadataResult;
+      apiResultData.result.forEach((tableMetadata) => {
+        tableMetadata.fullTableNameToBeUsedInSQLQueries = `"${tableMetadata.catalogQueryName}"."${tableMetadata.schemaName}"."${tableMetadata.tableName}"`;
+      });
+      result = [...result, ...apiResultData.result];
+    }
+
+    return result;
   }
 
   public async getProjectMetadata(
@@ -172,69 +143,42 @@ export class APIService {
     catalogId?: string,
     schemaName?: string
   ): Promise<ProjectMetadataResponse> {
-    try {
-      const url = GET_PROJECT_METADATA_URL_TEMPLATE({
-        projectId,
-      });
+    const url = GET_PROJECT_METADATA_URL_TEMPLATE({
+      projectId,
+    });
 
-      const params: Record<string, string> = {};
-      if (catalogId) {
-        params.catalogId = catalogId;
-      }
-      if (schemaName) {
-        params.schemaName = schemaName;
-      }
-
-      const response = await this.axiosInstance.get<ProjectMetadataResponse>(url, { params });
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
+    const params: Record<string, string> = {};
+    if (catalogId) {
+      params.catalogId = catalogId;
     }
+    if (schemaName) {
+      params.schemaName = schemaName;
+    }
+
+    const response = await this.axiosInstance.get<ProjectMetadataResponse>(url, { params });
+    return response.data;
   }
 
   public async listCatalogs(projectId: string): Promise<Catalog[]> {
-    try {
-      const url = LIST_CATALOGS_URL_TEMPLATE({
-        projectId,
-      });
+    const url = LIST_CATALOGS_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.get<Catalog[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<Catalog[]>(url);
+    return response.data;
   }
 
   public async listSchemas(
     projectId: string,
     catalogId: string
   ): Promise<Schema[]> {
-    try {
-      const url = LIST_SCHEMAS_URL_TEMPLATE({
-        projectId,
-        catalogId,
-      });
+    const url = LIST_SCHEMAS_URL_TEMPLATE({
+      projectId,
+      catalogId,
+    });
 
-      const response = await this.axiosInstance.get<Schema[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<Schema[]>(url);
+    return response.data;
   }
 
   public async listTables(
@@ -242,23 +186,14 @@ export class APIService {
     catalogId: string,
     schemaName: string
   ): Promise<Table[]> {
-    try {
-      const url = LIST_TABLES_URL_TEMPLATE({
-        projectId,
-        catalogId,
-        schemaName,
-      });
+    const url = LIST_TABLES_URL_TEMPLATE({
+      projectId,
+      catalogId,
+      schemaName,
+    });
 
-      const response = await this.axiosInstance.get<Table[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<Table[]>(url);
+    return response.data;
   }
 
   public async listColumns(
@@ -267,131 +202,77 @@ export class APIService {
     schemaName: string,
     tableName: string
   ): Promise<ColumnDetail[]> {
-    try {
-      const url = LIST_COLUMNS_URL_TEMPLATE({
-        projectId,
-        catalogId,
-        schemaName,
-        tableName,
-      });
+    const url = LIST_COLUMNS_URL_TEMPLATE({
+      projectId,
+      catalogId,
+      schemaName,
+      tableName,
+    });
 
-      const response = await this.axiosInstance.get<ColumnDetail[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<ColumnDetail[]>(url);
+    return response.data;
   }
 
   public async createCache(
     projectId: string,
     body: CreateCacheRequest
   ): Promise<Cache> {
-    try {
-      const url = CREATE_CACHE_URL_TEMPLATE({
-        projectId,
-      });
+    const url = CREATE_CACHE_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.post<Cache>(url, body);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post<Cache>(url, body);
+    return response.data;
   }
 
   public async createCacheBatch(
     projectId: string,
     body: CreateCacheBatchRequest
   ): Promise<Cache[]> {
-    try {
-      const url = CREATE_CACHE_BATCH_URL_TEMPLATE({
-        projectId,
-      });
+    const url = CREATE_CACHE_BATCH_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.post<Cache[]>(url, body);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post<Cache[]>(url, body);
+    return response.data;
   }
 
   public async getCacheStatuses(projectId: string): Promise<CacheStatus[]> {
-    try {
-      const url = GET_CACHE_STATUSES_URL_TEMPLATE({
-        projectId,
-      });
+    const url = GET_CACHE_STATUSES_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.get<CacheStatus[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<CacheStatus[]>(url);
+    return response.data;
   }
 
   public async refreshCacheFull(
     projectId: string,
     cacheId: string
   ): Promise<RefreshCacheFullResponse> {
-    try {
-      const url = REFRESH_CACHE_FULL_URL_TEMPLATE({
-        projectId,
-        cacheId,
-      });
+    const url = REFRESH_CACHE_FULL_URL_TEMPLATE({
+      projectId,
+      cacheId,
+    });
 
-      const response = await this.axiosInstance.post<RefreshCacheFullResponse>(
-        url
-      );
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post<RefreshCacheFullResponse>(
+      url
+    );
+    return response.data;
   }
 
   public async refreshCacheIncremental(
     projectId: string,
     cacheId: string
   ): Promise<RefreshCacheIncrementalResponse> {
-    try {
-      const url = REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE({
-        projectId,
-        cacheId,
-      });
+    const url = REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE({
+      projectId,
+      cacheId,
+    });
 
-      const response =
-        await this.axiosInstance.post<RefreshCacheIncrementalResponse>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response =
+      await this.axiosInstance.post<RefreshCacheIncrementalResponse>(url);
+    return response.data;
   }
 
   public async updateCache(
@@ -399,85 +280,47 @@ export class APIService {
     cacheId: string,
     body: UpdateCacheRequest
   ): Promise<Cache> {
-    try {
-      const url = UPDATE_CACHE_URL_TEMPLATE({
-        projectId,
-        cacheId,
-      });
+    const url = UPDATE_CACHE_URL_TEMPLATE({
+      projectId,
+      cacheId,
+    });
 
-      const response = await this.axiosInstance.put<Cache>(url, body);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.put<Cache>(url, body);
+    return response.data;
   }
 
   public async deleteCache(
     projectId: string,
     cacheId: string
   ): Promise<DeleteCacheResponse> {
-    try {
-      const url = DELETE_CACHE_URL_TEMPLATE({
-        projectId,
-        cacheId,
-      });
+    const url = DELETE_CACHE_URL_TEMPLATE({
+      projectId,
+      cacheId,
+    });
 
-      const response = await this.axiosInstance.delete<DeleteCacheResponse>(
-        url
-      );
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.delete<DeleteCacheResponse>(url);
+    return response.data;
   }
 
   public async listQueries(projectId: string): Promise<SavedQuery[]> {
-    try {
-      const url = LIST_QUERIES_URL_TEMPLATE({
-        projectId,
-      });
+    const url = LIST_QUERIES_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.get<SavedQuery[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<SavedQuery[]>(url);
+    return response.data;
   }
 
   public async createQuery(
     projectId: string,
     body: CreateQueryRequest
   ): Promise<SavedQuery> {
-    try {
-      const url = CREATE_QUERY_URL_TEMPLATE({
-        projectId,
-      });
+    const url = CREATE_QUERY_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.post<SavedQuery>(url, body);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post<SavedQuery>(url, body);
+    return response.data;
   }
 
   public async updateQuery(
@@ -485,164 +328,90 @@ export class APIService {
     queryId: string,
     body: UpdateQueryRequest
   ): Promise<SavedQuery> {
-    try {
-      const url = UPDATE_QUERY_URL_TEMPLATE({
-        projectId,
-        queryId,
-      });
+    const url = UPDATE_QUERY_URL_TEMPLATE({
+      projectId,
+      queryId,
+    });
 
-      const response = await this.axiosInstance.put<SavedQuery>(url, body);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.put<SavedQuery>(url, body);
+    return response.data;
   }
 
   public async deleteQuery(
     projectId: string,
     queryId: string
   ): Promise<DeleteQueryResponse> {
-    try {
-      const url = DELETE_QUERY_URL_TEMPLATE({
-        projectId,
-        queryId,
-      });
+    const url = DELETE_QUERY_URL_TEMPLATE({
+      projectId,
+      queryId,
+    });
 
-      const response = await this.axiosInstance.delete<DeleteQueryResponse>(
-        url
-      );
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.delete<DeleteQueryResponse>(url);
+    return response.data;
   }
 
   public async executeQuery(
     projectId: string,
     queryId: string
   ): Promise<QueryResult> {
-    try {
-      const url = EXECUTE_QUERY_URL_TEMPLATE({
-        projectId,
-      });
+    const url = EXECUTE_QUERY_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.post<QueryResult>(url, {
-        id: queryId,
-      });
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post<QueryResult>(url, {
+      id: queryId,
+    });
+    return response.data;
   }
 
   public async executeSQLStatement(
     projectId: string,
     statement: string
   ): Promise<QueryResult> {
-    try {
-      const url = EXECUTE_QUERY_URL_TEMPLATE({
-        projectId,
-      });
+    const url = EXECUTE_QUERY_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.post<QueryResult>(
-        url,
-        { statement },
-        { timeout: 20000 }
-      );
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post<QueryResult>(
+      url,
+      { statement },
+      { timeout: 20000 }
+    );
+    return response.data;
   }
 
   public async transpileQueryToTrinoDialect(
     query: string
   ): Promise<QueryContainer> {
-    try {
-      const url = TRANSPILE_TRINO_SQL_URL_TEMPLATE({
-        dialect: "trino",
-      });
+    const url = TRANSPILE_TRINO_SQL_URL_TEMPLATE({
+      dialect: "trino",
+    });
 
-      const response = await this.axiosInstance.post<QueryContainer>(url, {
-        query,
-      });
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post<QueryContainer>(url, {
+      query,
+    });
+    return response.data;
   }
 
   public async listOrganizations(): Promise<Organization[]> {
-    try {
-      const url = LIST_ORGANIZATIONS_URL();
-      const response = await this.axiosInstance.get<Organization[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const url = LIST_ORGANIZATIONS_URL();
+    const response = await this.axiosInstance.get<Organization[]>(url);
+    return response.data;
   }
 
   public async listWorkspaces(organizationId: string): Promise<Workspace[]> {
-    try {
-      const url = LIST_WORKSPACES_URL_TEMPLATE({ organizationId });
-      const response = await this.axiosInstance.get<Workspace[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const url = LIST_WORKSPACES_URL_TEMPLATE({ organizationId });
+    const response = await this.axiosInstance.get<Workspace[]>(url);
+    return response.data;
   }
 
   public async listProjects(
     organizationId: string,
     workspaceId: string
   ): Promise<Project[]> {
-    try {
-      const url = LIST_PROJECTS_URL_TEMPLATE({ organizationId, workspaceId });
-      const response = await this.axiosInstance.get<Project[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const url = LIST_PROJECTS_URL_TEMPLATE({ organizationId, workspaceId });
+    const response = await this.axiosInstance.get<Project[]>(url);
+    return response.data;
   }
 
   public async listAllProjects(): Promise<ProjectListItem[]> {
@@ -673,70 +442,43 @@ export class APIService {
     projectId: string,
     catalogId: string
   ): Promise<MetadataRefreshResponse> {
-    try {
-      const url = REFRESH_PROJECT_METADATA_URL_TEMPLATE({
-        projectId,
-      });
+    const url = REFRESH_PROJECT_METADATA_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.post<MetadataRefreshResponse>(
-        url,
-        { catalogId },
-        { timeout: 30000 }
-      );
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post<MetadataRefreshResponse>(
+      url,
+      { catalogId },
+      { timeout: 30000 }
+    );
+    return response.data;
   }
 
   public async getMetadataRefreshStatus(
     projectId: string,
     catalogId: string
   ): Promise<MetadataRefreshStatusResponse> {
-    try {
-      const url = GET_METADATA_REFRESH_STATUS_URL_TEMPLATE({
-        projectId,
-        catalogId,
-      });
+    const url = GET_METADATA_REFRESH_STATUS_URL_TEMPLATE({
+      projectId,
+      catalogId,
+    });
 
-      const response =
-        await this.axiosInstance.get<MetadataRefreshStatusResponse>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response =
+      await this.axiosInstance.get<MetadataRefreshStatusResponse>(url);
+    return response.data;
   }
 
   public async getRelations(
     projectId: string,
     catalogId: string
   ): Promise<CatalogRelations> {
-    try {
-      const url = GET_RELATIONS_URL_TEMPLATE({
-        projectId,
-        catalogId,
-      });
+    const url = GET_RELATIONS_URL_TEMPLATE({
+      projectId,
+      catalogId,
+    });
 
-      const response = await this.axiosInstance.get<CatalogRelations>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<CatalogRelations>(url);
+    return response.data;
   }
 
   public async getTableStatistics(
@@ -746,62 +488,35 @@ export class APIService {
     tableName: string
   ): Promise<TableStatistics> {
     const url = GET_TABLE_STATISTICS_URL_TEMPLATE({
-        projectId,
-        catalogId,
-        schemaName,
-        tableName,
-      });
+      projectId,
+      catalogId,
+      schemaName,
+      tableName,
+    });
 
-    try {
-      const response = await this.axiosInstance.get<TableStatistics>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<TableStatistics>(url);
+    return response.data;
   }
 
   public async listConnections(projectId: string): Promise<Connection[]> {
-    try {
-      const url = LIST_CONNECTIONS_URL_TEMPLATE({
-        projectId,
-      });
+    const url = LIST_CONNECTIONS_URL_TEMPLATE({
+      projectId,
+    });
 
-      const response = await this.axiosInstance.get<Connection[]>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<Connection[]>(url);
+    return response.data;
   }
 
   public async getConnectionDetail(
     projectId: string,
     connectionId: string
   ): Promise<ConnectionDetail> {
-    try {
-      const url = GET_CONNECTION_DETAIL_URL_TEMPLATE({
-        projectId,
-        connectionId,
-      });
+    const url = GET_CONNECTION_DETAIL_URL_TEMPLATE({
+      projectId,
+      connectionId,
+    });
 
-      const response = await this.axiosInstance.get<ConnectionDetail>(url);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Invalid API Key.");
-        }
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get<ConnectionDetail>(url);
+    return response.data;
   }
 }
