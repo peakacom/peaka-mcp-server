@@ -67,6 +67,12 @@ Every project-scoped tool takes a `projectId` argument. If the MCP client does n
   - List all data source connections in the Peaka project, including each connection's id, name, and type.
 - `peaka_get_connection_detail`
   - Get connection-specific configuration detail for a data source connection.
+- `peaka_create_semantic_catalog`
+  - Create a semantic catalog in the Peaka project. A semantic catalog groups semantic tables (saved queries surfaced as queryable tables) under a single namespace.
+- `peaka_create_semantic_table`
+  - Create a semantic table inside a semantic catalog, backed by a saved query. Requires `catalogId`, `schemaName`, `tableName`, and `queryId`.
+- `peaka_delete_semantic_table`
+  - Delete a semantic table from a semantic catalog. The underlying saved query is not affected.
 - `peaka_refresh_project_metadata`
   - Refresh project metadata for a specific catalog. Long-running; triggers the refresh and polls for completion.
 - `peaka_get_metadata_refresh_status`
