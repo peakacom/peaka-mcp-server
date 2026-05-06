@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "peaka-mcp-server",
   "display_name": "Peaka",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "MCP server for querying Peaka data using natural language and SQL",
   "author": {
     "name": "Peaka"
@@ -124,6 +124,18 @@
     {
       "name": "peaka_get_connection_detail",
       "description": "Get connection-specific configuration detail for a data source. Requires projectId. Use peaka_list_connections to discover connection IDs."
+    },
+    {
+      "name": "peaka_create_semantic_catalog",
+      "description": "Create a semantic catalog in a Peaka project. Requires projectId. A semantic catalog groups semantic tables (saved queries surfaced as queryable tables) under a single namespace. Returns the created catalog including its id."
+    },
+    {
+      "name": "peaka_create_semantic_table",
+      "description": "Create a semantic table inside a semantic catalog, backed by a saved query. Requires projectId, catalogId, schemaName, tableName, and queryId. Use peaka_create_query (or peaka_list_queries) to obtain the queryId."
+    },
+    {
+      "name": "peaka_delete_semantic_table",
+      "description": "Delete a semantic table from a semantic catalog. Requires projectId, catalogId, and tableId. The underlying saved query is not affected."
     },
     {
       "name": "peaka_refresh_project_metadata",

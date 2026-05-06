@@ -211,6 +211,36 @@ export interface DeleteCacheResponse {
   ok: boolean;
 }
 
+export interface CreateSemanticCatalogRequest {
+  name: string;
+}
+
+export interface SemanticCatalog {
+  id: string;
+  name: string;
+  displayName: string;
+  type: string;
+  connectionId?: string | null;
+}
+
+export interface CreateSemanticTableRequest {
+  schemaName: string;
+  tableName: string;
+  queryId: string;
+}
+
+export interface SemanticTable {
+  tableId: string;
+  catalogName?: string;
+  catalogId?: string;
+  schemaName: string;
+  tableName: string;
+}
+
+export interface DeleteSemanticTableResponse {
+  ok: boolean;
+}
+
 export interface QuerySchedule {
   expression: string;
   type: string;

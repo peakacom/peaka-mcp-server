@@ -5,7 +5,6 @@ import { PeakaSession } from "./types";
 type Logger = Context<PeakaSession>["log"];
 
 export function handleToolError(error: unknown, logger?: Logger) {
-  logger?.debug(JSON.stringify(error));
   if (error instanceof UserError) {
     throw error;
   }

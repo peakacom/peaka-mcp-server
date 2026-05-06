@@ -26,6 +26,11 @@ import {
   RefreshCacheIncrementalResponse,
   UpdateCacheRequest,
   DeleteCacheResponse,
+  CreateSemanticCatalogRequest,
+  SemanticCatalog,
+  CreateSemanticTableRequest,
+  SemanticTable,
+  DeleteSemanticTableResponse,
   SavedQuery,
   CreateQueryRequest,
   UpdateQueryRequest,
@@ -42,6 +47,9 @@ import {
   REFRESH_CACHE_INCREMENTAL_URL_TEMPLATE,
   UPDATE_CACHE_URL_TEMPLATE,
   DELETE_CACHE_URL_TEMPLATE,
+  CREATE_SEMANTIC_CATALOG_URL_TEMPLATE,
+  CREATE_SEMANTIC_TABLE_URL_TEMPLATE,
+  DELETE_SEMANTIC_TABLE_URL_TEMPLATE,
   GET_METADATA_REFRESH_STATUS_URL_TEMPLATE,
   GET_PROJECT_METADATA_URL_TEMPLATE,
   GET_RELATIONS_URL_TEMPLATE,
@@ -300,6 +308,47 @@ export class APIService {
 
     const response = await this.axiosInstance.delete<DeleteCacheResponse>(url);
     return response.data;
+  }
+
+  public async createSemanticCatalog(
+    projectId: string,
+    body: CreateSemanticCatalogRequest
+  ): Promise<SemanticCatalog> {
+    const url = CREATE_SEMANTIC_CATALOG_URL_TEMPLATE({
+      projectId,
+    });
+
+    const response = await this.axiosInstance.post<SemanticCatalog>(url, body);
+    return response.data;
+  }
+
+  public async createSemanticTable(
+    projectId: string,
+    catalogId: string,
+    body: CreateSemanticTableRequest
+  ): Promise<SemanticTable> {
+    const url = CREATE_SEMANTIC_TABLE_URL_TEMPLATE({
+      projectId,
+      catalogId,
+    });
+
+    const response = await this.axiosInstance.post<SemanticTable>(url, body);
+    return response.data;
+  }
+
+  public async deleteSemanticTable(
+    projectId: string,
+    catalogId: string,
+    tableId: string
+  ): Promise<DeleteSemanticTableResponse> {
+    const url = DELETE_SEMANTIC_TABLE_URL_TEMPLATE({
+      projectId,
+      catalogId,
+      tableId,
+    });
+
+    await this.axiosInstance.delete(url);
+    return { ok: true };
   }
 
   public async listQueries(projectId: string): Promise<SavedQuery[]> {

@@ -106,6 +106,30 @@ export const DELETE_CACHE_URL_TEMPLATE = ({
   cacheId: string;
 }) => `data/projects/${projectId}/cache/${cacheId}`;
 
+export const CREATE_SEMANTIC_CATALOG_URL_TEMPLATE = ({
+  projectId,
+}: {
+  projectId: string;
+}) => `data/projects/${projectId}/semantic-catalogs`;
+
+export const CREATE_SEMANTIC_TABLE_URL_TEMPLATE = ({
+  projectId,
+  catalogId,
+}: {
+  projectId: string;
+  catalogId: string;
+}) => `data/projects/${projectId}/semantic-catalogs/${catalogId}`;
+
+export const DELETE_SEMANTIC_TABLE_URL_TEMPLATE = ({
+  projectId,
+  catalogId,
+  tableId,
+}: {
+  projectId: string;
+  catalogId: string;
+  tableId: string;
+}) => `data/projects/${projectId}/semantic-catalogs/${catalogId}/table/${tableId}`;
+
 export const LIST_QUERIES_URL_TEMPLATE = ({
   projectId,
 }: {
