@@ -12,6 +12,7 @@ export const registerCreateSemanticCatalogTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "Create Semantic Catalog",
       readOnlyHint: false,
       destructiveHint: false,
     },

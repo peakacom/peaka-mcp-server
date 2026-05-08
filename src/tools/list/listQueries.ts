@@ -12,6 +12,7 @@ export const registerListQueriesTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "List Queries",
       readOnlyHint: true,
     },
     parameters: z.object({

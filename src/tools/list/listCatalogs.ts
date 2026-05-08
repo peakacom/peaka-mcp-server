@@ -12,6 +12,7 @@ export const registerListCatalogsTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "List Catalogs",
       readOnlyHint: true,
     },
     parameters: z.object({

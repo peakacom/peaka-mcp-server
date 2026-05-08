@@ -12,6 +12,7 @@ export const registerListColumnsTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "List Columns",
       readOnlyHint: true,
     },
     parameters: z.object({

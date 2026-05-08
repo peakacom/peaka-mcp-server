@@ -18,6 +18,9 @@ export const registerExecuteSqlQueryTool: ToolRegister = (server) => {
         3b: If the caching is rejected by the user, warn them that the query results will be limited and use LIMIT statements on the query to make sure it doesn't run forever
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      title: "Execute Sql Query",
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       query: z.string(),
