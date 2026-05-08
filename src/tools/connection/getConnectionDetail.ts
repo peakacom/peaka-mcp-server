@@ -12,6 +12,7 @@ export const registerGetConnectionDetailTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "Get Connection Detail",
       readOnlyHint: true,
     },
     parameters: z.object({

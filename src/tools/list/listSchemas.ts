@@ -12,6 +12,7 @@ export const registerListSchemasTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "List Schemas",
       readOnlyHint: true,
     },
     parameters: z.object({

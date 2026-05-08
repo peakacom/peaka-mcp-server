@@ -12,6 +12,7 @@ export const registerListTablesTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "List Tables",
       readOnlyHint: true,
     },
     parameters: z.object({

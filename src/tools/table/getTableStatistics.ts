@@ -12,6 +12,7 @@ export const registerGetTableStatisticsTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "Get Table Statistics",
       readOnlyHint: true,
     },
     parameters: z.object({

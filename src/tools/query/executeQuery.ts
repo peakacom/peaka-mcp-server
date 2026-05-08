@@ -11,6 +11,9 @@ export const registerExecuteQueryTool: ToolRegister = (server) => {
       `Execute a saved query by its ID in the Peaka project. Use peaka_list_queries to find available query IDs.
 
     ${PROJECT_ID_HINT}`,
+    annotations: {
+      title: "Execute Query",
+    },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       queryId: z.string(),
