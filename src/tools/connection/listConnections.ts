@@ -12,6 +12,7 @@ export const registerListConnectionsTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "List Connections",
       readOnlyHint: true,
     },
     parameters: z.object({

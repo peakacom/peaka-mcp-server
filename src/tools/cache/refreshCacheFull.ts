@@ -12,6 +12,7 @@ export const registerRefreshCacheFullTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "Refresh Cache Full",
       readOnlyHint: false,
       destructiveHint: false,
     },

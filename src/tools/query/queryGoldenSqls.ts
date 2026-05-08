@@ -14,6 +14,7 @@ export const registerQueryGoldenSqlsTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "Query Golden Sqls",
       readOnlyHint: true,
     },
     parameters: z.object({

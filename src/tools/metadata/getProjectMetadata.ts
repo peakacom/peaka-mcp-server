@@ -12,6 +12,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "Get Project Metadata",
       readOnlyHint: true,
     },
     parameters: z.object({

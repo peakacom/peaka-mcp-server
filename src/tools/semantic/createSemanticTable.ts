@@ -12,6 +12,7 @@ export const registerCreateSemanticTableTool: ToolRegister = (server) => {
 
     ${PROJECT_ID_HINT}`,
     annotations: {
+      title: "Create Semantic Table",
       readOnlyHint: false,
       destructiveHint: false,
     },
