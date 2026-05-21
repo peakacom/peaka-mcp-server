@@ -35,6 +35,7 @@ import {
   CreateQueryRequest,
   UpdateQueryRequest,
   DeleteQueryResponse,
+  RefreshMaterializedQueryResponse,
   QueryResult,
   TableMetadataResult,
   Workspace,
@@ -55,6 +56,7 @@ import {
   GET_RELATIONS_URL_TEMPLATE,
   GET_TABLE_STATISTICS_URL_TEMPLATE,
   EXECUTE_QUERY_URL_TEMPLATE,
+  REFRESH_MATERIALIZED_QUERY_URL_TEMPLATE,
   LIST_QUERIES_URL_TEMPLATE,
   CREATE_QUERY_URL_TEMPLATE,
   UPDATE_QUERY_URL_TEMPLATE,
@@ -410,6 +412,20 @@ export class APIService {
     const response = await this.axiosInstance.post<QueryResult>(url, {
       id: queryId,
     });
+    return response.data;
+  }
+
+  public async refreshMaterializedQuery(
+    projectId: string,
+    queryId: string
+  ): Promise<RefreshMaterializedQueryResponse> {
+    const url = REFRESH_MATERIALIZED_QUERY_URL_TEMPLATE({
+      projectId,
+      queryId,
+    });
+
+    const response =
+      await this.axiosInstance.post<RefreshMaterializedQueryResponse>(url);
     return response.data;
   }
 

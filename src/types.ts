@@ -274,6 +274,11 @@ export interface DeleteQueryResponse {
   ok: boolean;
 }
 
+export interface RefreshMaterializedQueryResponse {
+  status?: string;
+  message?: string;
+}
+
 export type CatalogRelations = Record<string, Record<string, unknown>>;
 
 export interface ColumnStatistics {

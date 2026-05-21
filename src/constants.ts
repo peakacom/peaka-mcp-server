@@ -164,6 +164,14 @@ export const EXECUTE_QUERY_URL_TEMPLATE = ({
   projectId: string;
 }) => `data/projects/${projectId}/queries/execute`;
 
+export const REFRESH_MATERIALIZED_QUERY_URL_TEMPLATE = ({
+  projectId,
+  queryId,
+}: {
+  projectId: string;
+  queryId: string;
+}) => `data/projects/${projectId}/materialized-queries/${queryId}/refresh`;
+
 export const GET_PROJECT_METADATA_URL_TEMPLATE = ({
   projectId,
 }: {
