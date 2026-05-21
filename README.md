@@ -63,6 +63,8 @@ Every project-scoped tool takes a `projectId` argument. If the MCP client does n
   - Update an existing saved query's display name and/or SQL body.
 - `peaka_delete_query`
   - Delete a saved query from the Peaka project.
+- `peaka_refresh_materialized_query`
+  - Trigger a refresh on a materialized saved query. Use `peaka_list_queries` to find query IDs whose `queryType` is `MATERIALIZED`.
 - `peaka_list_connections`
   - List all data source connections in the Peaka project, including each connection's id, name, and type.
 - `peaka_get_connection_detail`
