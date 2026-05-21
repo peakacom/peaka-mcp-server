@@ -66,6 +66,10 @@
       "description": "Delete a saved query from a Peaka project. Requires projectId. Use peaka_list_queries to find available query IDs."
     },
     {
+      "name": "peaka_refresh_materialized_query",
+      "description": "Trigger a refresh on a materialized saved query in a Peaka project. Requires projectId. Use peaka_list_queries to find query IDs whose queryType is MATERIALIZED."
+    },
+    {
       "name": "peaka_create_cache",
       "description": "Create a cache for a table in a Peaka project. Requires projectId. Caching a table improves query performance by storing the data locally."
     },
