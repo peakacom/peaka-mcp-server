@@ -12,8 +12,15 @@ export const registerListProjectsTool: ToolRegister = (server) => {
       title: "List Projects",
       readOnlyHint: true,
     },
-    parameters: z.object({}),
-    execute: async (_, { log, session }) => {
+    parameters: z.object({
+      search: z
+        .string()
+        .optional()
+        .describe(
+          "Optional case-insensitive filter. Only projects whose project, workspace, or organization name contains this string are returned."
+        ),
+    }),
+    execute: async ({ search }, { log, session }) => {
       try {
         const svc = resolveService(session);
         const info = await svc.getProjectInfo();
@@ -40,7 +47,16 @@ export const registerListProjectsTool: ToolRegister = (server) => {
           };
         }
 
-        const projects = await svc.listAllProjects();
+        let projects = await svc.listAllProjects();
+        if (search) {
+          const q = search.toLowerCase();
+          projects = projects.filter(
+            (p) =>
+              p.projectName.toLowerCase().includes(q) ||
+              p.workspaceName.toLowerCase().includes(q) ||
+              p.organizationName.toLowerCase().includes(q)
+          );
+        }
         return {
           content: [
             {
