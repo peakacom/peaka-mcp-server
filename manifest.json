@@ -151,5 +151,5 @@
     }
   ],
   "keywords": ["peaka", "sql", "database", "analytics"],
-  "license": "MIT"
+  "license": "Apache-2.0"
 }
