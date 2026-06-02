@@ -4,7 +4,7 @@ import { PeakaSession } from "./types";
 
 type Logger = Context<PeakaSession>["log"];
 
-export function handleToolError(error: unknown, logger?: Logger): never {
+export function handleToolError(error: unknown, logger?: Logger): void {
   if (error instanceof UserError) {
     throw error;
   }
