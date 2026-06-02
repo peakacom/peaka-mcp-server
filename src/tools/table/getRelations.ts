@@ -31,7 +31,7 @@ export const registerGetRelationsTool: ToolRegister = (server) => {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
       } catch (error) {
-        return handleToolError(error, log);
+        handleToolError(error, log);
       }
     },
   });
