@@ -18,7 +18,7 @@ const mode = getMode();
 
 const server = new FastMCP<PeakaSession>({
   name: "Peaka",
-  version: "1.0.0",
+  version: "0.9.2",
   ...(mode === "httpStream" && {
     authenticate: async (request) => {
       const authHeader = request.headers.authorization;

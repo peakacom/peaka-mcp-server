@@ -114,7 +114,7 @@ export class APIService {
   ): Promise<GoldenSqlResult> {
     const url = QUERY_GOLDEN_SQL_URL_TEMPLATE({
       projectId,
-      query: encodeURI(query),
+      query: encodeURIComponent(query),
     });
 
     const response = await this.axiosInstance.get<GoldenSqlResult>(url);
@@ -129,7 +129,7 @@ export class APIService {
     for (const tableName of tableNames) {
       const url = QUERY_TABLE_METADATA_URL_TEMPLATE({
         projectId,
-        tableName: encodeURI(tableName),
+        tableName: encodeURIComponent(tableName),
       });
       apiCalls.push(this.axiosInstance.get<TableMetadataResult>(url));
     }
