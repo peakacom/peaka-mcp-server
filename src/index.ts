@@ -29,9 +29,7 @@ const server = new FastMCP<PeakaSession>({
         }
         const resourceMetadataUrl = new URL(authServerUrl);
         resourceMetadataUrl.pathname = ".well-known/oauth-authorization-server";
-        const wwwAuth = authServerUrl
-          ? `Bearer resource_metadata="${resourceMetadataUrl.toString()}"`
-          : `Bearer`;
+        const wwwAuth = `Bearer resource_metadata="${resourceMetadataUrl.toString()}"`;
         throw new Response(
           JSON.stringify({
             error: "unauthorized",
@@ -90,15 +88,22 @@ server.addResource({
   },
 });
 
+const onStartError = (error: unknown) => {
+  console.error("Failed to start Peaka MCP server:", error);
+  process.exit(1);
+};
+
 if (mode === "httpStream") {
-  server.start({
-    transportType: "httpStream",
-    httpStream: {
-      port: Number(process.env.PORT) || DEFAULT_PORT,
-      stateless: true,
-      host: "0.0.0.0",
-    },
-  });
+  server
+    .start({
+      transportType: "httpStream",
+      httpStream: {
+        port: process.env.PORT ? Number(process.env.PORT) : DEFAULT_PORT,
+        stateless: true,
+        host: "0.0.0.0",
+      },
+    })
+    .catch(onStartError);
 } else {
-  server.start({ transportType: "stdio" });
+  server.start({ transportType: "stdio" }).catch(onStartError);
 }
