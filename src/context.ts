@@ -1,3 +1,4 @@
+import { UserError } from "fastmcp";
 import { APIService } from "./api.service";
 import type { PeakaSession } from "./types";
 
@@ -13,8 +14,14 @@ export function resolveService(session: PeakaSession | undefined): APIService {
       baseUrl: process.env.PARTNER_API_BASE_URL,
     });
   }
+  const apiKey = process.env.PEAKA_API_KEY;
+  if (!apiKey) {
+    throw new UserError(
+      "PEAKA_API_KEY is not set. Set the PEAKA_API_KEY environment variable to authenticate with Peaka in stdio mode."
+    );
+  }
   return new APIService({
-    accessToken: process.env.PEAKA_API_KEY || "",
+    accessToken: apiKey,
     baseUrl: process.env.PARTNER_API_BASE_URL,
   });
 }
