@@ -1,7 +1,7 @@
 FROM registry.access.redhat.com/ubi9/nodejs-22 As development
 
 USER root
-RUN microdnf upgrade -y && microdnf clean all
+RUN dnf upgrade -y && dnf clean all
 USER 1001
 
 WORKDIR /opt/app-root/src
@@ -18,7 +18,7 @@ RUN npm run build
 FROM registry.access.redhat.com/ubi9/nodejs-22 as production
 
 USER root
-RUN microdnf upgrade -y && microdnf clean all
+RUN dnf upgrade -y && dnf clean all
 USER 1001
 
 LABEL name="peaka/peaka-mcp-server" vendor="Peaka" version="1.0.0" release="1" summary="peaka-mcp-server — Peaka platform service" description="peaka-mcp-server, part of the Peaka data integration platform, on Red Hat UBI9 (Node.js 22)." maintainer="furkan@peaka.com"
