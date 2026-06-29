@@ -36,6 +36,7 @@ import {
   UpdateQueryRequest,
   DeleteQueryResponse,
   RefreshMaterializedQueryResponse,
+  MaterializedQueryStatus,
   QueryResult,
   TableMetadataResult,
   Workspace,
@@ -57,7 +58,10 @@ import {
   GET_TABLE_STATISTICS_URL_TEMPLATE,
   EXECUTE_QUERY_URL_TEMPLATE,
   REFRESH_MATERIALIZED_QUERY_URL_TEMPLATE,
+  LIST_MATERIALIZED_QUERY_STATUSES_URL_TEMPLATE,
+  GET_MATERIALIZED_QUERY_STATUS_URL_TEMPLATE,
   LIST_QUERIES_URL_TEMPLATE,
+  GET_QUERY_URL_TEMPLATE,
   CREATE_QUERY_URL_TEMPLATE,
   UPDATE_QUERY_URL_TEMPLATE,
   DELETE_QUERY_URL_TEMPLATE,
@@ -362,6 +366,19 @@ export class APIService {
     return response.data;
   }
 
+  public async getQuery(
+    projectId: string,
+    queryId: string
+  ): Promise<SavedQuery> {
+    const url = GET_QUERY_URL_TEMPLATE({
+      projectId,
+      queryId,
+    });
+
+    const response = await this.axiosInstance.get<SavedQuery>(url);
+    return response.data;
+  }
+
   public async createQuery(
     projectId: string,
     body: CreateQueryRequest
@@ -426,6 +443,32 @@ export class APIService {
 
     const response =
       await this.axiosInstance.post<RefreshMaterializedQueryResponse>(url);
+    return response.data;
+  }
+
+  public async getMaterializedQueryStatuses(
+    projectId: string
+  ): Promise<MaterializedQueryStatus[]> {
+    const url = LIST_MATERIALIZED_QUERY_STATUSES_URL_TEMPLATE({
+      projectId,
+    });
+
+    const response = await this.axiosInstance.get<MaterializedQueryStatus[]>(
+      url
+    );
+    return response.data;
+  }
+
+  public async getMaterializedQueryStatus(
+    projectId: string,
+    queryId: string
+  ): Promise<MaterializedQueryStatus> {
+    const url = GET_MATERIALIZED_QUERY_STATUS_URL_TEMPLATE({
+      projectId,
+      queryId,
+    });
+
+    const response = await this.axiosInstance.get<MaterializedQueryStatus>(url);
     return response.data;
   }
 

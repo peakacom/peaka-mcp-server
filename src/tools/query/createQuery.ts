@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, QUERY_SCHEDULE_SCHEMA } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
 
@@ -29,6 +29,7 @@ export const registerCreateQueryTool: ToolRegister = (server) => {
         .describe(
           "PLAIN runs the SQL on each execute; MATERIALIZED stores results."
         ),
+      schedule: QUERY_SCHEDULE_SCHEMA.optional(),
     }),
     execute: async (args, { log, session }) => {
       try {
@@ -37,6 +38,7 @@ export const registerCreateQueryTool: ToolRegister = (server) => {
           displayName: args.displayName,
           inputQuery: args.inputQuery,
           queryType: args.queryType,
+          ...(args.schedule ? { schedule: args.schedule } : {}),
         });
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
