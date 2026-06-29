@@ -58,13 +58,15 @@ Every project-scoped tool takes a `projectId` argument. If the MCP client does n
 - `peaka_execute_query`
   - Execute a saved query by its ID in the Peaka project.
 - `peaka_create_query`
-  - Create a named, saved query in the project's semantic layer. Returns the created query including its ID.
+  - Create a named, saved query in the project's semantic layer. Returns the created query including its ID. For materialized queries, accepts an optional `schedule` (ISO-8601 duration, e.g. `PT6H`) to set the auto-refresh interval.
 - `peaka_update_query`
-  - Update an existing saved query's display name and/or SQL body.
+  - Update an existing saved query's display name, SQL body, and/or auto-refresh `schedule` (ISO-8601 duration, materialized queries only).
 - `peaka_delete_query`
   - Delete a saved query from the Peaka project.
 - `peaka_refresh_materialized_query`
   - Trigger a refresh on a materialized saved query. Use `peaka_list_queries` to find query IDs whose `queryType` is `MATERIALIZED`.
+- `peaka_get_materialized_query_statuses`
+  - Inspect the auto-refresh state of materialized queries: last refresh status, last/next scheduled execution, and schedule settings. Pass a `queryId` for a single query or omit it to list all.
 - `peaka_list_connections`
   - List all data source connections in the Peaka project, including each connection's id, name, and type.
 - `peaka_get_connection_detail`

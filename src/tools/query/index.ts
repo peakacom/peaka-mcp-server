@@ -6,6 +6,7 @@ import { registerCreateQueryTool } from "./createQuery";
 import { registerUpdateQueryTool } from "./updateQuery";
 import { registerDeleteQueryTool } from "./deleteQuery";
 import { registerRefreshMaterializedQueryTool } from "./refreshMaterializedQuery";
+import { registerMaterializedQueryStatusTool } from "./materializedQueryStatus";
 
 export const registerQueryTools: ToolRegister = (server) => {
   registerQueryGoldenSqlsTool(server);
@@ -15,4 +16,5 @@ export const registerQueryTools: ToolRegister = (server) => {
   registerUpdateQueryTool(server);
   registerDeleteQueryTool(server);
   registerRefreshMaterializedQueryTool(server);
+  registerMaterializedQueryStatusTool(server);
 };

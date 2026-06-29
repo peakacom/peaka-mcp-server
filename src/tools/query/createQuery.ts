@@ -29,6 +29,12 @@ export const registerCreateQueryTool: ToolRegister = (server) => {
         .describe(
           "PLAIN runs the SQL on each execute; MATERIALIZED stores results."
         ),
+      schedule: z
+        .string()
+        .optional()
+        .describe(
+          "Auto-refresh interval for MATERIALIZED queries as an ISO-8601 duration, e.g. PT6H, P1D. Omit to leave the backend default (effectively no scheduled refresh). Ignored for PLAIN queries."
+        ),
     }),
     execute: async (args, { log, session }) => {
       try {
@@ -37,6 +43,9 @@ export const registerCreateQueryTool: ToolRegister = (server) => {
           displayName: args.displayName,
           inputQuery: args.inputQuery,
           queryType: args.queryType,
+          ...(args.schedule
+            ? { schedule: { expression: args.schedule } }
+            : {}),
         });
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

@@ -258,16 +258,39 @@ export interface SavedQuery {
 
 export type SavedQueryType = "PLAIN" | "MATERIALIZED";
 
+export interface QueryScheduleInput {
+  expression: string;
+}
+
 export interface CreateQueryRequest {
   displayName: string;
   inputQuery: string;
   queryType: SavedQueryType;
+  schedule?: QueryScheduleInput;
 }
 
 export interface UpdateQueryRequest {
   displayName?: string;
   inputQuery?: string;
   queryType?: SavedQueryType;
+  schedule?: QueryScheduleInput;
+}
+
+export interface MaterializedQueryScheduleSettings {
+  type: "interval" | "cron" | "none";
+  repeatDuration: string | null;
+  cronExpression: string | null;
+  timezone: string | null;
+}
+
+export interface MaterializedQueryStatus {
+  queryId: string;
+  queryName: string;
+  status: string;
+  lastExecutionStartTime: string | null;
+  nextExecutionStartTime: string | null;
+  lastUpdateTime: string | null;
+  scheduleSettings: MaterializedQueryScheduleSettings | null;
 }
 
 export interface DeleteQueryResponse {

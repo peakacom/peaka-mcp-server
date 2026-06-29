@@ -172,6 +172,20 @@ export const REFRESH_MATERIALIZED_QUERY_URL_TEMPLATE = ({
   queryId: string;
 }) => `data/projects/${projectId}/materialized-queries/${queryId}/refresh`;
 
+export const LIST_MATERIALIZED_QUERY_STATUSES_URL_TEMPLATE = ({
+  projectId,
+}: {
+  projectId: string;
+}) => `data/projects/${projectId}/materialized-queries/status`;
+
+export const GET_MATERIALIZED_QUERY_STATUS_URL_TEMPLATE = ({
+  projectId,
+  queryId,
+}: {
+  projectId: string;
+  queryId: string;
+}) => `data/projects/${projectId}/materialized-queries/${queryId}/status`;
+
 export const GET_PROJECT_METADATA_URL_TEMPLATE = ({
   projectId,
 }: {
