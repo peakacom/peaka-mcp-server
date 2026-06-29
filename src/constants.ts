@@ -142,6 +142,14 @@ export const CREATE_QUERY_URL_TEMPLATE = ({
   projectId: string;
 }) => `data/projects/${projectId}/queries`;
 
+export const GET_QUERY_URL_TEMPLATE = ({
+  projectId,
+  queryId,
+}: {
+  projectId: string;
+  queryId: string;
+}) => `data/projects/${projectId}/queries/${queryId}`;
+
 export const UPDATE_QUERY_URL_TEMPLATE = ({
   projectId,
   queryId,

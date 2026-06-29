@@ -1,7 +1,7 @@
 import { UserError } from "fastmcp";
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, QUERY_SCHEDULE_SCHEMA } from "../shared";
 import type { ToolRegister } from "../types";
 import type { UpdateQueryRequest } from "../../types";
 import { handleToolError } from "../../error";
@@ -32,12 +32,7 @@ export const registerUpdateQueryTool: ToolRegister = (server) => {
         .string()
         .optional()
         .describe("New Trino SQL body for the saved query."),
-      schedule: z
-        .string()
-        .optional()
-        .describe(
-          "New auto-refresh interval for a MATERIALIZED query as an ISO-8601 duration, e.g. PT6H, P1D. Applies only to materialized queries."
-        ),
+      schedule: QUERY_SCHEDULE_SCHEMA.optional(),
     }),
     execute: async (args, { log, session }) => {
       try {
@@ -50,7 +45,7 @@ export const registerUpdateQueryTool: ToolRegister = (server) => {
         const body: UpdateQueryRequest = {};
         if (args.displayName) body.displayName = args.displayName;
         if (args.inputQuery) body.inputQuery = args.inputQuery;
-        if (args.schedule) body.schedule = { expression: args.schedule };
+        if (args.schedule) body.schedule = args.schedule;
 
         const svc = resolveService(session);
         const result = await svc.updateQuery(args.projectId, args.queryId, body);

@@ -242,8 +242,12 @@ export interface DeleteSemanticTableResponse {
 }
 
 export interface QuerySchedule {
-  expression: string;
   type: string;
+  // Deprecated single-duration form; newer responses use the fields below.
+  expression?: string;
+  repeatDuration?: string | null;
+  cronExpression?: string | null;
+  timezone?: string | null;
 }
 
 export interface SavedQuery {
@@ -254,13 +258,26 @@ export interface SavedQuery {
   inputQueryRefId: string;
   queryType: string;
   schedule: QuerySchedule | null;
+  path?: string | null;
+  folderId?: string | null;
 }
 
 export type SavedQueryType = "PLAIN" | "MATERIALIZED";
 
-export interface QueryScheduleInput {
-  expression: string;
+export interface IntervalQueryScheduleInput {
+  type: "interval";
+  repeatDuration: string;
 }
+
+export interface CronQueryScheduleInput {
+  type: "cron";
+  cronExpression: string;
+  timezone: string;
+}
+
+export type QueryScheduleInput =
+  | IntervalQueryScheduleInput
+  | CronQueryScheduleInput;
 
 export interface CreateQueryRequest {
   displayName: string;

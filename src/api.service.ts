@@ -61,6 +61,7 @@ import {
   LIST_MATERIALIZED_QUERY_STATUSES_URL_TEMPLATE,
   GET_MATERIALIZED_QUERY_STATUS_URL_TEMPLATE,
   LIST_QUERIES_URL_TEMPLATE,
+  GET_QUERY_URL_TEMPLATE,
   CREATE_QUERY_URL_TEMPLATE,
   UPDATE_QUERY_URL_TEMPLATE,
   DELETE_QUERY_URL_TEMPLATE,
@@ -362,6 +363,19 @@ export class APIService {
     });
 
     const response = await this.axiosInstance.get<SavedQuery[]>(url);
+    return response.data;
+  }
+
+  public async getQuery(
+    projectId: string,
+    queryId: string
+  ): Promise<SavedQuery> {
+    const url = GET_QUERY_URL_TEMPLATE({
+      projectId,
+      queryId,
+    });
+
+    const response = await this.axiosInstance.get<SavedQuery>(url);
     return response.data;
   }
 
