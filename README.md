@@ -60,9 +60,9 @@ Every project-scoped tool takes a `projectId` argument. If the MCP client does n
 - `peaka_execute_query`
   - Execute a saved query by its ID in the Peaka project.
 - `peaka_create_query`
-  - Create a named, saved query in the project's semantic layer. Returns the created query including its ID. For materialized queries, accepts an optional `schedule` to set the auto-refresh cadence — either `{type: "interval", repeatDuration: "PT6H"}` or `{type: "cron", cronExpression: "0 0 * * *", timezone: "UTC"}`.
+  - Create a named, saved query in the project's semantic layer. Returns the created query including its ID. For materialized queries, accepts an optional `schedule` to set the auto-refresh cadence — `{type: "interval", repeatDuration: "PT6H"}`, `{type: "cron", cronExpression: "0 0 * * *", timezone: "UTC"}`, or `{type: "none"}` to disable.
 - `peaka_update_query`
-  - Update an existing saved query's display name, SQL body, and/or auto-refresh `schedule` (interval or cron form; materialized queries only).
+  - Update an existing saved query's display name, SQL body, and/or auto-refresh `schedule` (interval, cron, or `{type: "none"}` to disable; materialized queries only).
 - `peaka_delete_query`
   - Delete a saved query from the Peaka project.
 - `peaka_refresh_materialized_query`

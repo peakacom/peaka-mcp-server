@@ -26,9 +26,12 @@ export const QUERY_SCHEDULE_SCHEMA = z
         .default("UTC")
         .describe("IANA timezone used to evaluate the cron expression, e.g. UTC, Europe/Istanbul."),
     }),
+    z.object({
+      type: z.literal("none"),
+    }),
   ])
   .describe(
-    "Auto-refresh schedule for MATERIALIZED queries. Use {type: 'interval', repeatDuration} or {type: 'cron', cronExpression, timezone}. Ignored for PLAIN queries."
+    "Auto-refresh schedule for MATERIALIZED queries. Use {type: 'interval', repeatDuration}, {type: 'cron', cronExpression, timezone}, or {type: 'none'} to disable an existing schedule. Ignored for PLAIN queries."
   );
 
 // Filters metadata to reduce token usage for LLMs:

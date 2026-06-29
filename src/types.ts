@@ -275,9 +275,14 @@ export interface CronQueryScheduleInput {
   timezone: string;
 }
 
+export interface NoneQueryScheduleInput {
+  type: "none";
+}
+
 export type QueryScheduleInput =
   | IntervalQueryScheduleInput
-  | CronQueryScheduleInput;
+  | CronQueryScheduleInput
+  | NoneQueryScheduleInput;
 
 export interface CreateQueryRequest {
   displayName: string;
