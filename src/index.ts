@@ -18,17 +18,25 @@ const mode = getMode();
 
 const server = new FastMCP<PeakaSession>({
   name: "Peaka",
-  version: "0.9.2",
+  version: "0.11.0",
   ...(mode === "httpStream" && {
     authenticate: async (request) => {
       const authHeader = request.headers.authorization;
       if (!authHeader?.startsWith("Bearer ")) {
-        const authServerUrl = process.env.OAUTH_AUTHORIZATION_SERVER_URL;
-        if (!authServerUrl) {
-          throw new Error("No OAUTH_AUTHORIZATION_SERVER_URL in the env");
+        const forwardedProto = (
+          request.headers["x-forwarded-proto"] as string | undefined
+        )?.split(",")[0].trim();
+        const forwardedHost = (
+          request.headers["x-forwarded-host"] as string | undefined
+        )?.split(",")[0].trim();
+        const host = forwardedHost ?? request.headers.host;
+        if (!host) {
+          throw new Error("Cannot determine request host for OAuth metadata");
         }
-        const resourceMetadataUrl = new URL(authServerUrl);
-        resourceMetadataUrl.pathname = ".well-known/oauth-authorization-server";
+        const resourceMetadataUrl = new URL(
+          "/.well-known/oauth-protected-resource",
+          `${forwardedProto ?? "https"}://${host}`,
+        );
         const wwwAuth = `Bearer resource_metadata="${resourceMetadataUrl.toString()}"`;
         throw new Response(
           JSON.stringify({
