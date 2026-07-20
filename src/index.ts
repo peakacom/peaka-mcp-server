@@ -97,7 +97,7 @@ server.addResource({
 });
 
 const onStartError = (error: unknown) => {
-  console.error("Failed to start Peaka MCP server:", error);
+  console.error("Failed to start Peaka MCP server: ", error);
   process.exit(1);
 };
 
