@@ -1,0 +1,116 @@
+PEAKA END USER LICENSE AGREEMENT
+
+Last updated: June 11, 2026
+
+This End User License Agreement ("Agreement") is a legal agreement between
+you, or the entity you represent ("Customer"), and Peaka ("Licensor")
+governing the use of the Peaka software distributed in this container image,
+including all associated services, binaries, configuration files, and
+documentation (collectively, the "Software").
+
+By downloading, installing, copying, or otherwise using this container image,
+you agree to be bound by the terms of this Agreement. If you do not agree to
+these terms, do not download, install, or use the Software.
+
+1. LICENSE GRANT
+Subject to the terms of this Agreement and a valid subscription or other
+commercial agreement with Licensor, Licensor grants Customer a limited,
+non-exclusive, non-transferable, non-sublicensable license to install and
+run the Software, in container form, solely for Customer's internal business
+purposes and only for the duration and scope (including any user, instance,
+or capacity limits) defined in the applicable commercial agreement.
+
+2. RESTRICTIONS
+Except as expressly permitted by this Agreement or by applicable law that
+cannot be contractually waived, Customer shall not, and shall not permit any
+third party to:
+  a) copy, distribute, sell, rent, lease, sublicense, or otherwise transfer
+     the Software or this container image to any third party;
+  b) modify, adapt, translate, or create derivative works of the Software;
+  c) reverse engineer, decompile, or disassemble the Software, or otherwise
+     attempt to derive its source code;
+  d) remove, alter, or obscure any proprietary notices, labels, or marks on
+     or in the Software or this container image;
+  e) use the Software to provide services to third parties as a service
+     bureau, managed service, or otherwise, unless expressly agreed in
+     writing by Licensor;
+  f) publish or disclose to any third party any performance or benchmark
+     tests or analyses of the Software without Licensor's prior written
+     consent;
+  g) use the Software in violation of any applicable law or regulation.
+
+3. OWNERSHIP
+The Software is licensed, not sold. Licensor and its licensors retain all
+right, title, and interest in and to the Software, including all
+intellectual property rights therein. No rights are granted to Customer
+other than as expressly set forth in this Agreement.
+
+4. THIRD-PARTY AND OPEN SOURCE COMPONENTS
+This container image includes third-party and open source software
+components, which are provided under their own license terms, including
+without limitation components distributed under the Apache License 2.0,
+the MIT License, and the Eclipse Public License. Such components are
+identified, together with their applicable license terms, in the
+accompanying third-party notices or within the components themselves.
+Nothing in this Agreement limits Customer's rights under, or grants
+Customer rights that supersede, the applicable terms of any such
+third-party or open source license. The base operating system layers of
+this image are provided by Red Hat, Inc. under the Red Hat Universal Base
+Image End User License Agreement, available at:
+https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf
+
+5. SUPPORT AND UPDATES
+Support, maintenance, and updates, if any, are provided under the terms of
+the applicable commercial agreement between Customer and Licensor. Licensor
+may make updated versions of this container image available from time to
+time; this Agreement applies to all such updates unless they are accompanied
+by a separate license.
+
+6. CONFIDENTIALITY
+The Software, including its non-public features, performance
+characteristics, and documentation, constitutes confidential information of
+Licensor. Customer shall protect it with at least the same degree of care it
+uses for its own confidential information, and no less than reasonable care.
+
+7. WARRANTY DISCLAIMER
+EXCEPT AS EXPRESSLY PROVIDED IN AN APPLICABLE COMMERCIAL AGREEMENT, THE
+SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING WITHOUT LIMITATION ANY WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE, OR NON-INFRINGEMENT. LICENSOR DOES
+NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE OR THAT ITS OPERATION WILL
+BE UNINTERRUPTED.
+
+8. LIMITATION OF LIABILITY
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL
+LICENSOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
+PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, REVENUE, DATA, OR BUSINESS
+OPPORTUNITIES, ARISING OUT OF OR RELATED TO THIS AGREEMENT, WHETHER IN
+CONTRACT, TORT, OR OTHERWISE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES. LICENSOR'S TOTAL AGGREGATE LIABILITY UNDER THIS AGREEMENT SHALL NOT
+EXCEED THE AMOUNTS PAID OR PAYABLE BY CUSTOMER FOR THE SOFTWARE IN THE
+TWELVE (12) MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM. NOTHING IN
+THIS AGREEMENT EXCLUDES OR LIMITS LIABILITY THAT CANNOT BE EXCLUDED OR
+LIMITED UNDER APPLICABLE LAW.
+
+9. TERM AND TERMINATION
+This Agreement is effective until terminated. It terminates automatically if
+Customer breaches any of its terms and fails to cure such breach within
+thirty (30) days of notice, or upon expiry or termination of the applicable
+commercial agreement. Upon termination, Customer shall cease all use of the
+Software and destroy all copies of this container image in its possession.
+Sections 3, 4, 6, 7, 8, 9, and 10 survive termination.
+
+10. GENERAL
+This Agreement, together with the applicable commercial agreement,
+constitutes the entire agreement between the parties regarding the Software
+and supersedes all prior or contemporaneous understandings on that subject.
+If any provision of this Agreement is held unenforceable, the remaining
+provisions remain in full force. This Agreement is governed by the laws of
+the jurisdiction in which Licensor is incorporated, without regard to its
+conflict of laws principles, and any dispute arising out of it shall be
+subject to the exclusive jurisdiction of the competent courts of that
+jurisdiction. Where Customer has executed a commercial agreement with
+Licensor containing different governing law or dispute resolution terms,
+those terms prevail.
+
+For licensing questions, contact: support@peaka.com
