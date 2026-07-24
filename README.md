@@ -125,9 +125,12 @@ You can use following environment variable for configuration:
 
 | Name                 | Description                                             | Default Value                       |
 | -------------------- | ------------------------------------------------------- | ----------------------------------- |
-| PEAKA_API_KEY        | Project API key for authenticating with Peaka services. | -                                   |
+| PEAKA_API_KEY        | Project API key for authenticating with Peaka services (stdio mode). | -                                   |
 | PARTNER_API_BASE_URL | Base URL for Peaka partner API                          | https://partner.peaka.studio/api/v1 |
-| OAUTH_AUTHORIZATION_SERVER_URL      | Protected-resource metadata URL advertised in the `WWW-Authenticate` header on 401 responses (httpStream mode). | -                                   |
+| OAUTH_ISSUER         | Authorization server issuer, used to validate the `iss` claim of incoming access tokens (httpStream mode, **required**). | -                    |
+| OAUTH_JWKS_URI       | Authorization server JWKS endpoint used to verify access-token signatures (httpStream mode, **required**). | -                    |
+| OAUTH_REQUIRED_SCOPE | Scope an access token must carry to be accepted (httpStream mode). | `user_access`             |
+| OAUTH_RESOURCE       | Expected token audience (this MCP server's resource URL). When set, tokens whose `aud` does not match are rejected. Leave unset until the authorization server binds `aud` to the resource. | -                    |
 
 ## Contact
 

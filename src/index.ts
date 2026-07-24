@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import { FastMCP } from "fastmcp";
+import { createRemoteJWKSet } from "jose";
 import "dotenv/config";
 import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE, DEFAULT_PORT } from "./constants";
 import type { PeakaSession } from "./types";
 import { getMode } from "./context";
+import { loadAuthConfig, createAuthenticator } from "./auth";
 import {
   registerQueryTools,
   registerMetadataTools,
@@ -16,41 +18,23 @@ import {
 
 const mode = getMode();
 
+const authenticate =
+  mode === "httpStream"
+    ? (() => {
+        const config = loadAuthConfig();
+        const jwks = createRemoteJWKSet(new URL(config.jwksUri));
+        return createAuthenticator(config, jwks);
+      })()
+    : undefined;
+
 const server = new FastMCP<PeakaSession>({
   name: "Peaka",
-  version: "0.9.2",
+  version: "0.11.0",
   ...(mode === "httpStream" && {
-    authenticate: async (request) => {
-      const authHeader = request.headers.authorization;
-      if (!authHeader?.startsWith("Bearer ")) {
-        const authServerUrl = process.env.OAUTH_AUTHORIZATION_SERVER_URL;
-        if (!authServerUrl) {
-          throw new Error("No OAUTH_AUTHORIZATION_SERVER_URL in the env");
-        }
-        const resourceMetadataUrl = new URL(authServerUrl);
-        resourceMetadataUrl.pathname = ".well-known/oauth-authorization-server";
-        const wwwAuth = `Bearer resource_metadata="${resourceMetadataUrl.toString()}"`;
-        throw new Response(
-          JSON.stringify({
-            error: "unauthorized",
-            error_description: "Missing Bearer token",
-          }),
-          {
-            status: 401,
-            statusText: "Unauthorized",
-            headers: {
-              "WWW-Authenticate": wwwAuth,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-      }
-      const token = authHeader.slice(7);
-      return { accessToken: token };
-    },
+    authenticate,
     health: {
       enabled: true,
-    }
+    },
   }),
 });
 
@@ -89,7 +73,7 @@ server.addResource({
 });
 
 const onStartError = (error: unknown) => {
-  console.error("Failed to start Peaka MCP server:", error);
+  console.error("Failed to start Peaka MCP server: ", error);
   process.exit(1);
 };
 

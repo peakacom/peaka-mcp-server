@@ -38,6 +38,32 @@ steps:
     depends_on:
       - set-version
 
+  # Red Hat UBI variant: same source and release version, built from
+  # Dockerfile.redhat and pushed with a -redhat_ubi tag suffix. Runs only on
+  # release tags.
+  - name: image-build-push-redhat
+    pull: always
+    privileged: true
+    image: code2io/ci-image-build-push:${image_build_push_plugin_ver}
+    environment:
+      IMAGE_NAME: ${DRONE_REPO_NAME}
+      DOCKERFILE: Dockerfile.redhat
+      IMAGE_TAG_SUFFIX: "-redhat_ubi"
+      CONTAINER_REGISTRY:
+        from_secret: CONTAINER_REGISTRY
+      REGISTRY_AUTH_FILE:
+        from_secret: REGISTRY_AUTH_FILE
+    volumes:
+      - name: artifacts
+        path: /artifacts
+      - name: gcp-ar-auth-secret
+        path: /gcp
+    when:
+      event:
+        - tag
+    depends_on:
+      - set-version
+
   - name: deploy
     pull: always
     image: code2io/ci-deploy:${deploy_plugin_ver}
