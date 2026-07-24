@@ -19,7 +19,7 @@
     "check": "tsc --noEmit",
     "build": "tsup src/index.ts --dts --format esm --external xdg-app-paths --external which",
     "pack": "npm run build && mcpb pack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -42,12 +42,14 @@
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.4.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "axios": "^1.13.5",
     "dotenv": "^16.4.7",
     "fastmcp": "^3.34.0",
+    "jose": "^5.10.0",
     "zod": "^3.24.2"
   }
 }
