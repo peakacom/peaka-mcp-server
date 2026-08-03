@@ -30,8 +30,8 @@
     "mcp",
     "ai"
   ],
-  "author": "Ibrahim GURSES",
-  "license": "Apache-2.0",
+  "author": "Peaka (https://peaka.com)",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/peakacom/peaka-mcp-server/issues"
   },
