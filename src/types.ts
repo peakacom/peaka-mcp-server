@@ -187,10 +187,9 @@ export interface RefreshCacheIncrementalResponse {
   message: string;
 }
 
-export interface CacheScheduleInput {
-  type: string;
-  expression: string;
-}
+export type CacheScheduleInput =
+  | { type: "BASIC"; expression: string }
+  | { type: "NONE" };
 
 export interface CreateCacheRequest {
   catalogId: string;

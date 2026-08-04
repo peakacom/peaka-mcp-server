@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, CACHE_SCHEDULE_SCHEMA } from "../shared";
 import type { ToolRegister } from "../types";
 import type { CreateCacheRequest } from "../../types";
 import { handleToolError } from "../../error";
@@ -22,18 +22,12 @@ export const registerCreateCacheTool: ToolRegister = (server) => {
       catalogId: z.string(),
       schemaName: z.string(),
       tableName: z.string(),
-      incrementalSchedule: z
-        .string()
-        .optional()
-        .describe(
-          "Optional ISO-8601 duration for the incremental refresh schedule, e.g. PT6H, P1D."
-        ),
-      fullRefreshSchedule: z
-        .string()
-        .optional()
-        .describe(
-          "Optional ISO-8601 duration for the full refresh schedule, e.g. P7D, P30D."
-        ),
+      incrementalSchedule: CACHE_SCHEDULE_SCHEMA.optional().describe(
+        "Optional incremental refresh schedule. {type: 'BASIC', expression: 'PT6H'} for recurring, or {type: 'NONE'} to leave it off. Omit to leave unset."
+      ),
+      fullRefreshSchedule: CACHE_SCHEDULE_SCHEMA.optional().describe(
+        "Optional full refresh schedule. {type: 'BASIC', expression: 'P7D'} for recurring, or {type: 'NONE'} to leave it off. Omit to leave unset."
+      ),
     }),
     execute: async (args, { log, session }) => {
       try {
@@ -43,16 +37,10 @@ export const registerCreateCacheTool: ToolRegister = (server) => {
           tableName: args.tableName,
         };
         if (args.incrementalSchedule) {
-          body.incrementalCacheSchedule = {
-            type: "BASIC",
-            expression: args.incrementalSchedule,
-          };
+          body.incrementalCacheSchedule = args.incrementalSchedule;
         }
         if (args.fullRefreshSchedule) {
-          body.fullRefreshCacheSchedule = {
-            type: "BASIC",
-            expression: args.fullRefreshSchedule,
-          };
+          body.fullRefreshCacheSchedule = args.fullRefreshSchedule;
         }
 
         const svc = resolveService(session);
