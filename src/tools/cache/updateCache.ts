@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, CACHE_SCHEDULE_SCHEMA } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
 
@@ -8,7 +8,7 @@ export const registerUpdateCacheTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_update_cache",
     description:
-      `Update cache settings on an existing cache in the Peaka project. This endpoint replaces — not merges — the schedules, so both incrementalSchedule and fullRefreshSchedule must be supplied with the full intended state every call. Schedule expressions use ISO-8601 durations (e.g. PT6H, P1D, P7D, P30D).
+      `Update cache settings on an existing cache in the Peaka project. This endpoint replaces — not merges — the schedules, so both incrementalSchedule and fullRefreshSchedule must be supplied with the full intended state every call. Each schedule is either {type: "BASIC", expression} with an ISO-8601 duration (e.g. PT6H, P1D, P7D, P30D), or {type: "NONE"} to turn that refresh off. The response reflects the schedule actually applied, which the backend may clamp to its allowed range — check it.
 
     ${PROJECT_ID_HINT}`,
     annotations: {
@@ -24,29 +24,19 @@ export const registerUpdateCacheTool: ToolRegister = (server) => {
         .describe(
           "The cache ID to update. Available from peaka_get_cache_statuses."
         ),
-      incrementalSchedule: z
-        .string()
-        .describe(
-          "ISO-8601 duration for the incremental refresh schedule, e.g. PT6H, P1D. Required — replaces the existing value."
-        ),
-      fullRefreshSchedule: z
-        .string()
-        .describe(
-          "ISO-8601 duration for the full refresh schedule, e.g. P7D, P30D. Required — replaces the existing value."
-        ),
+      incrementalSchedule: CACHE_SCHEDULE_SCHEMA.describe(
+        "Incremental refresh schedule. Required — replaces the existing value. {type: 'BASIC', expression: 'PT6H'} for recurring, or {type: 'NONE'} to disable."
+      ),
+      fullRefreshSchedule: CACHE_SCHEDULE_SCHEMA.describe(
+        "Full refresh schedule. Required — replaces the existing value. {type: 'BASIC', expression: 'P7D'} for recurring, or {type: 'NONE'} to disable."
+      ),
     }),
     execute: async (args, { log, session }) => {
       try {
         const svc = resolveService(session);
         const result = await svc.updateCache(args.projectId, args.cacheId, {
-          incrementalCacheSchedule: {
-            type: "BASIC",
-            expression: args.incrementalSchedule,
-          },
-          fullRefreshCacheSchedule: {
-            type: "BASIC",
-            expression: args.fullRefreshSchedule,
-          },
+          incrementalCacheSchedule: args.incrementalSchedule,
+          fullRefreshCacheSchedule: args.fullRefreshSchedule,
         });
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

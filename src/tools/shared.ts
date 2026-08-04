@@ -34,6 +34,37 @@ export const QUERY_SCHEDULE_SCHEMA = z
     "Auto-refresh schedule for MATERIALIZED queries. Use {type: 'interval', repeatDuration}, {type: 'cron', cronExpression, timezone}, or {type: 'none'} to disable an existing schedule. Ignored for PLAIN queries."
   );
 
+// ISO-8601 duration, e.g. PT6H, P1D, P7D, P30D. Validated up front so an
+// invalid expression is rejected with an error instead of being silently
+// reset to a backend default.
+export const ISO8601_DURATION =
+  /^P(?!$)(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+S)?)?$/;
+
+// Auto-refresh schedule for a cache. {type:'BASIC', expression} sets a
+// recurring refresh; {type:'NONE'} disables it. Matches the REST cache-settings
+// API, which uses type: "NONE" (expression omitted) to turn a schedule off.
+export const CACHE_SCHEDULE_SCHEMA = z
+  .discriminatedUnion("type", [
+    z.object({
+      type: z.literal("BASIC"),
+      expression: z
+        .string()
+        .regex(
+          ISO8601_DURATION,
+          "Must be an ISO-8601 duration, e.g. PT6H, P1D, P7D, P30D."
+        )
+        .describe(
+          "ISO-8601 duration between refreshes, e.g. PT6H, P1D, P7D, P30D."
+        ),
+    }),
+    z.object({
+      type: z.literal("NONE"),
+    }),
+  ])
+  .describe(
+    "Cache auto-refresh schedule. Use {type: 'BASIC', expression: 'PT6H'} for a recurring refresh, or {type: 'NONE'} to disable it."
+  );
+
 // Filters metadata to reduce token usage for LLMs:
 // - Removes system columns (e.g. _q_pagination_anchor, _q_offset)
 // - Strips isCategorical when false
