@@ -526,44 +526,67 @@ export class APIService {
     return axios.isAxiosError(error) && error.response?.status === 403;
   }
 
-  public async listAllProjects(): Promise<ProjectListItem[]> {
+  public async listAllProjects(): Promise<{
+    projects: ProjectListItem[];
+    forbidden: string[];
+  }> {
     const orgs = await this.listOrganizations();
 
     // The user can be attached to orgs/workspaces they aren't authorized to
     // enumerate; those return 403. Skip only those, so one forbidden area
-    // doesn't abort the whole listing. Any other error is a real failure and
-    // is rethrown rather than silently yielding a partial list.
+    // doesn't abort the whole listing — but collect what was skipped so the
+    // caller can surface it (a 403 can mean a broken endpoint, not just "not
+    // yours"). Any non-403 error is a real failure and is rethrown.
     const perOrg = await Promise.all(
       orgs.map(async (org) => {
-        const workspaces = await this.listWorkspaces(org.id).catch((error) => {
-          if (APIService.isForbidden(error)) return [] as Workspace[];
+        let workspaces: Workspace[];
+        try {
+          workspaces = await this.listWorkspaces(org.id);
+        } catch (error) {
+          if (APIService.isForbidden(error)) {
+            return { projects: [], forbidden: [`${org.name} (all workspaces)`] };
+          }
           throw error;
-        });
+        }
 
         const perWorkspace = await Promise.all(
           workspaces.map(async (ws) => {
-            const projects = await this.listProjects(org.id, ws.id).catch(
-              (error) => {
-                if (APIService.isForbidden(error)) return [] as Project[];
-                throw error;
+            try {
+              const projects = await this.listProjects(org.id, ws.id);
+              return {
+                projects: projects.map((proj) => ({
+                  organizationId: org.id,
+                  organizationName: org.name,
+                  workspaceId: ws.id,
+                  workspaceName: ws.name,
+                  projectId: proj.id,
+                  projectName: proj.name,
+                })),
+                forbidden: [] as string[],
+              };
+            } catch (error) {
+              if (APIService.isForbidden(error)) {
+                return {
+                  projects: [] as ProjectListItem[],
+                  forbidden: [`${org.name} / ${ws.name}`],
+                };
               }
-            );
-            return projects.map((proj) => ({
-              organizationId: org.id,
-              organizationName: org.name,
-              workspaceId: ws.id,
-              workspaceName: ws.name,
-              projectId: proj.id,
-              projectName: proj.name,
-            }));
+              throw error;
+            }
           })
         );
 
-        return perWorkspace.flat();
+        return {
+          projects: perWorkspace.flatMap((r) => r.projects),
+          forbidden: perWorkspace.flatMap((r) => r.forbidden),
+        };
       })
     );
 
-    return perOrg.flat();
+    return {
+      projects: perOrg.flatMap((r) => r.projects),
+      forbidden: perOrg.flatMap((r) => r.forbidden),
+    };
   }
 
   public async refreshProjectMetadata(

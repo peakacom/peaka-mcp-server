@@ -35,7 +35,7 @@ function serverError(): AxiosError {
 }
 
 describe("listAllProjects", () => {
-  it("skips a forbidden workspace and still returns the others", async () => {
+  it("skips a forbidden workspace, returns the others, and reports the skip", async () => {
     const s = svc();
     vi.spyOn(s, "listOrganizations").mockResolvedValue([org("o1")]);
     vi.spyOn(s, "listWorkspaces").mockResolvedValue([ws("w1"), ws("w2")]);
@@ -44,11 +44,12 @@ describe("listAllProjects", () => {
       return [proj("p1")];
     });
 
-    const result = await s.listAllProjects();
-    expect(result.map((r) => r.projectId)).toEqual(["p1"]); // w2 skipped, not fatal
+    const { projects, forbidden: skipped } = await s.listAllProjects();
+    expect(projects.map((r) => r.projectId)).toEqual(["p1"]); // w2 skipped, not fatal
+    expect(skipped).toEqual(["org-o1 / ws-w2"]); // surfaced, not silent
   });
 
-  it("skips an org whose workspaces are forbidden", async () => {
+  it("skips an org whose workspaces are forbidden and reports it", async () => {
     const s = svc();
     vi.spyOn(s, "listOrganizations").mockResolvedValue([org("o1"), org("o2")]);
     vi.spyOn(s, "listWorkspaces").mockImplementation(async (orgId) => {
@@ -57,8 +58,20 @@ describe("listAllProjects", () => {
     });
     vi.spyOn(s, "listProjects").mockResolvedValue([proj("p1")]);
 
-    const result = await s.listAllProjects();
-    expect(result.map((r) => r.projectId)).toEqual(["p1"]);
+    const { projects, forbidden: skipped } = await s.listAllProjects();
+    expect(projects.map((r) => r.projectId)).toEqual(["p1"]);
+    expect(skipped).toEqual(["org-o2 (all workspaces)"]);
+  });
+
+  it("reports all workspaces as forbidden when every projects call 403s (the test-env case)", async () => {
+    const s = svc();
+    vi.spyOn(s, "listOrganizations").mockResolvedValue([org("o1")]);
+    vi.spyOn(s, "listWorkspaces").mockResolvedValue([ws("w1"), ws("w2")]);
+    vi.spyOn(s, "listProjects").mockRejectedValue(forbidden());
+
+    const { projects, forbidden: skipped } = await s.listAllProjects();
+    expect(projects).toEqual([]);
+    expect(skipped).toEqual(["org-o1 / ws-w1", "org-o1 / ws-w2"]);
   });
 
   it("propagates non-403 errors instead of silently returning a partial list", async () => {
