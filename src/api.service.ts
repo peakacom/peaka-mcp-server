@@ -522,28 +522,48 @@ export class APIService {
     return response.data;
   }
 
+  private static isForbidden(error: unknown): boolean {
+    return axios.isAxiosError(error) && error.response?.status === 403;
+  }
+
   public async listAllProjects(): Promise<ProjectListItem[]> {
     const orgs = await this.listOrganizations();
-    const results: ProjectListItem[] = [];
 
-    for (const org of orgs) {
-      const workspaces = await this.listWorkspaces(org.id);
-      for (const ws of workspaces) {
-        const projects = await this.listProjects(org.id, ws.id);
-        for (const proj of projects) {
-          results.push({
-            organizationId: org.id,
-            organizationName: org.name,
-            workspaceId: ws.id,
-            workspaceName: ws.name,
-            projectId: proj.id,
-            projectName: proj.name,
-          });
-        }
-      }
-    }
+    // The user can be attached to orgs/workspaces they aren't authorized to
+    // enumerate; those return 403. Skip only those, so one forbidden area
+    // doesn't abort the whole listing. Any other error is a real failure and
+    // is rethrown rather than silently yielding a partial list.
+    const perOrg = await Promise.all(
+      orgs.map(async (org) => {
+        const workspaces = await this.listWorkspaces(org.id).catch((error) => {
+          if (APIService.isForbidden(error)) return [] as Workspace[];
+          throw error;
+        });
 
-    return results;
+        const perWorkspace = await Promise.all(
+          workspaces.map(async (ws) => {
+            const projects = await this.listProjects(org.id, ws.id).catch(
+              (error) => {
+                if (APIService.isForbidden(error)) return [] as Project[];
+                throw error;
+              }
+            );
+            return projects.map((proj) => ({
+              organizationId: org.id,
+              organizationName: org.name,
+              workspaceId: ws.id,
+              workspaceName: ws.name,
+              projectId: proj.id,
+              projectName: proj.name,
+            }));
+          })
+        );
+
+        return perWorkspace.flat();
+      })
+    );
+
+    return perOrg.flat();
   }
 
   public async refreshProjectMetadata(
