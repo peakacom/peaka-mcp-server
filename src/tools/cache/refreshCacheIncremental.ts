@@ -13,6 +13,7 @@ export const registerRefreshCacheIncrementalTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Refresh Cache Incremental",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: false,
     },

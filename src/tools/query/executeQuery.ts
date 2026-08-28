@@ -13,6 +13,9 @@ export const registerExecuteQueryTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Execute Query",
+      readOnlyHint: false,
+      openWorldHint: false,
+      destructiveHint: true,
     },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),

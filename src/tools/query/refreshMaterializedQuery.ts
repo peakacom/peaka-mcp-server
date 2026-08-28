@@ -13,6 +13,7 @@ export const registerRefreshMaterializedQueryTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Refresh Materialized Query",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: false,
     },

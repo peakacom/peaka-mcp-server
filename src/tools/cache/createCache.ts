@@ -14,6 +14,7 @@ export const registerCreateCacheTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Create Cache",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: false,
     },

@@ -13,6 +13,7 @@ export const registerCreateQueryTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Create Query",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: false,
     },

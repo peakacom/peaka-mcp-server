@@ -13,6 +13,7 @@ export const registerRefreshProjectMetadataTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Refresh Project Metadata",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: false,
     },

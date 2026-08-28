@@ -11,7 +11,9 @@ export const registerListProjectsTool: ToolRegister = (server) => {
       "List all projects accessible for the user. Use this tool to discover projectIds, then pass the chosen projectId to subsequent tool calls.",
     annotations: {
       title: "List Projects",
+      openWorldHint: false,
       readOnlyHint: true,
+      destructiveHint: false,
     },
     parameters: z.object({
       search: z

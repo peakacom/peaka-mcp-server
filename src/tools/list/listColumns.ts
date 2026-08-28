@@ -13,7 +13,9 @@ export const registerListColumnsTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "List Columns",
+      openWorldHint: false,
       readOnlyHint: true,
+      destructiveHint: false,
     },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),

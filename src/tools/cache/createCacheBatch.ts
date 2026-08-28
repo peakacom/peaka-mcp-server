@@ -14,6 +14,7 @@ export const registerCreateCacheBatchTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Create Cache Batch",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: false,
     },

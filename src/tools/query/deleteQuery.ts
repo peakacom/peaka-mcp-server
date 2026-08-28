@@ -13,6 +13,7 @@ export const registerDeleteQueryTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Delete Query",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: true,
     },

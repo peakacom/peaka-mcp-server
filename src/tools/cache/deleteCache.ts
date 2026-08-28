@@ -13,6 +13,7 @@ export const registerDeleteCacheTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Delete Cache",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: true,
     },

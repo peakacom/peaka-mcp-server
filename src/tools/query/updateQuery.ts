@@ -15,6 +15,7 @@ export const registerUpdateQueryTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Update Query",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: true,

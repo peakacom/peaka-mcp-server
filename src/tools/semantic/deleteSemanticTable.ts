@@ -13,6 +13,7 @@ export const registerDeleteSemanticTableTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Delete Semantic Table",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: true,
     },

@@ -13,6 +13,7 @@ export const registerUpdateCacheTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Update Cache",
+      openWorldHint: false,
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: true,
