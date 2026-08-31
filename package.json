@@ -1,6 +1,6 @@
 {
   "name": "@peaka/mcp-server-peaka",
-  "version": "0.12.3",
+  "version": "0.13.0",
   "description": "MCP Server for Peaka",
   "type": "module",
   "main": "dist/index.js",
