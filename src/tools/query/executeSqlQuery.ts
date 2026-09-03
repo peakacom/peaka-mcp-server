@@ -20,9 +20,9 @@ export const registerExecuteSqlQueryTool: ToolRegister = (server) => {
     ${PROJECT_ID_HINT}`,
     annotations: {
       title: "Execute Sql Query",
-      readOnlyHint: false,
-      openWorldHint: false,
-      destructiveHint: true,
+      readOnlyHint: true,
+      openWorldHint: true,
+      destructiveHint: false,
     },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
