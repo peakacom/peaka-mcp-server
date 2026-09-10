@@ -29,7 +29,7 @@ const authenticate =
 
 const server = new FastMCP<PeakaSession>({
   name: "Peaka",
-  version: "0.13.1",
+  version: "0.13.2",
   ...(mode === "httpStream" && {
     authenticate,
     health: {
