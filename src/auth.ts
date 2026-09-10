@@ -1,5 +1,5 @@
 import type { IncomingHttpHeaders } from "http";
-import { jwtVerify, type JWTPayload, type JWTVerifyGetKey } from "jose";
+import { jwtVerify, decodeJwt, type JWTPayload, type JWTVerifyGetKey } from "jose";
 import type { PeakaSession } from "./types";
 
 export type TokenErrorKind = "invalid_token" | "insufficient_scope";
@@ -8,16 +8,28 @@ export type TokenErrorKind = "invalid_token" | "insufficient_scope";
  * Raised by {@link verifyAccessToken} when a token fails validation. `kind`
  * maps to the OAuth `WWW-Authenticate` error and the HTTP status the transport
  * should return (401 for `invalid_token`, 403 for `insufficient_scope`).
+ *
+ * `code`/`claim` carry the underlying jose failure so the caller can log
+ * precisely which check failed (e.g. code=ERR_JWT_CLAIM_VALIDATION_FAILED,
+ * claim="iss"/"aud"; code=ERR_JWT_EXPIRED; code=ERR_JWS_SIGNATURE_VERIFICATION_FAILED).
  */
 export class TokenError extends Error {
   readonly kind: TokenErrorKind;
   readonly description: string;
+  readonly code?: string;
+  readonly claim?: string;
 
-  constructor(kind: TokenErrorKind, description: string) {
+  constructor(
+    kind: TokenErrorKind,
+    description: string,
+    detail?: { code?: string; claim?: string },
+  ) {
     super(description);
     this.name = "TokenError";
     this.kind = kind;
     this.description = description;
+    this.code = detail?.code;
+    this.claim = detail?.claim;
   }
 }
 
@@ -82,9 +94,14 @@ export async function verifyAccessToken(
       ...(config.audience ? { audience: config.audience } : {}),
     }));
   } catch (err) {
+    const e = err as { code?: unknown; claim?: unknown; message?: unknown };
     throw new TokenError(
       "invalid_token",
-      err instanceof Error ? err.message : "Token verification failed",
+      typeof e?.message === "string" ? e.message : "Token verification failed",
+      {
+        code: typeof e?.code === "string" ? e.code : undefined,
+        claim: typeof e?.claim === "string" ? e.claim : undefined,
+      },
     );
   }
 
@@ -165,17 +182,49 @@ export function buildChallenge(c: Challenge): Response {
   );
 }
 
+/** Makes a value safe to embed in a single log line: no control chars, bounded. */
+function logSafe(value: unknown): string {
+  return String(value ?? "").replace(/[\r\n\t]/g, " ").slice(0, 256);
+}
+
+/**
+ * Decodes (WITHOUT verifying) only the identifier claims we log for diagnostics.
+ * Never returns `sub`/`email`/`jti` or the token itself.
+ */
+function presentedIdentifiers(token: string): { iss: string; aud: string; scope: string } {
+  try {
+    const p = decodeJwt(token);
+    return {
+      iss: logSafe(p.iss),
+      aud: logSafe(Array.isArray(p.aud) ? p.aud.join(",") : p.aud),
+      scope: logSafe(extractScopes(p).join(" ")),
+    };
+  } catch {
+    return { iss: "", aud: "", scope: "" };
+  }
+}
+
 /**
  * Builds the fastmcp `authenticate` handler: rejects missing/invalid tokens
  * with a transport-level 401 and insufficient-scope with a 403, before any
  * tool or the Partner API is ever reached.
+ *
+ * Every rejection is logged (stderr, `[auth]`-prefixed) with the specific
+ * failure — for `invalid_token`, the jose code/claim plus the expected vs
+ * presented `iss`/`aud` so config mismatches (e.g. an issuer with/without an
+ * explicit `:443` port) are obvious. The bearer token is never logged.
  */
 export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey) {
   return async (request: { headers: IncomingHttpHeaders }): Promise<PeakaSession> => {
     const resourceMetadata = resourceMetadataUrl(request.headers);
+    const host = logSafe(
+      firstHeader(request.headers["x-forwarded-host"]) ?? request.headers.host,
+    );
     const authHeader = request.headers.authorization;
 
     if (!authHeader?.startsWith("Bearer ")) {
+      // A missing token is expected traffic (discovery, unauthenticated scans),
+      // not an auth failure worth logging; only presented-but-rejected tokens are.
       throw buildChallenge({
         status: 401,
         description: "Missing Bearer token",
@@ -188,7 +237,12 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
       return await verifyAccessToken(token, config, keySet);
     } catch (err) {
       if (err instanceof TokenError) {
+        const presented = presentedIdentifiers(token);
         if (err.kind === "insufficient_scope") {
+          console.warn(
+            `[auth] 403 insufficient_scope required="${logSafe(config.requiredScope)}" ` +
+              `presented_scope="${presented.scope}" host=${host}`,
+          );
           throw buildChallenge({
             status: 403,
             error: "insufficient_scope",
@@ -197,6 +251,13 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
             scope: config.requiredScope,
           });
         }
+        console.warn(
+          `[auth] 401 invalid_token code=${logSafe(err.code ?? "n/a")} ` +
+            `claim=${logSafe(err.claim ?? "n/a")} reason="${logSafe(err.description)}" ` +
+            `expected_iss="${logSafe(config.issuer)}" presented_iss="${presented.iss}" ` +
+            `expected_aud="${logSafe(config.audience ?? "(unchecked)")}" presented_aud="${presented.aud}" ` +
+            `host=${host}`,
+        );
         throw buildChallenge({
           status: 401,
           error: "invalid_token",
