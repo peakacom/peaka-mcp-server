@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, vi } from "vitest";
 import {
   SignJWT,
   exportJWK,
@@ -98,6 +98,9 @@ describe("verifyAccessToken", () => {
     const token = await sign({ scope: ["user_access"] }, { exp: now() - 60 });
     const err = await grab(verifyAccessToken(token, config, keySet));
     expect((err as TokenError).kind).toBe("invalid_token");
+    // failure detail is captured so it can be logged
+    expect((err as TokenError).claim).toBe("exp");
+    expect((err as TokenError).code).toBe("ERR_JWT_EXPIRED");
   });
 
   it("rejects a not-yet-valid token (nbf in the future)", async () => {
@@ -106,10 +109,11 @@ describe("verifyAccessToken", () => {
     expect((err as TokenError).kind).toBe("invalid_token");
   });
 
-  it("rejects a wrong issuer", async () => {
+  it("rejects a wrong issuer and captures the failing claim", async () => {
     const token = await sign({ scope: ["user_access"] }, { iss: "https://evil.test" });
     const err = await grab(verifyAccessToken(token, config, keySet));
     expect((err as TokenError).kind).toBe("invalid_token");
+    expect((err as TokenError).claim).toBe("iss");
   });
 
   it("rejects a bad signature (key not in JWKS)", async () => {
@@ -177,5 +181,24 @@ describe("createAuthenticator", () => {
     const token = await sign({ sub: "u", scope: ["user_access"] });
     const session = await auth()({ headers: headers(`Bearer ${token}`) });
     expect(session.accessToken).toBe(token);
+  });
+
+  it("logs the specific failure (iss mismatch) and never logs the token", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    // valid signature, but the issuer does not match config.issuer
+    const token = await sign(
+      { sub: "u", scope: ["user_access"] },
+      { iss: "https://real.test:443" },
+    );
+    const res = (await grab(auth()({ headers: headers(`Bearer ${token}`) }))) as Response;
+    expect(res.status).toBe(401);
+
+    const logged = warn.mock.calls.map((c) => String(c[0])).join("\n");
+    expect(logged).toContain("invalid_token");
+    expect(logged).toContain("claim=iss");
+    expect(logged).toContain('expected_iss="https://issuer.test"');
+    expect(logged).toContain('presented_iss="https://real.test:443"');
+    expect(logged).not.toContain(token); // token is never logged
+    warn.mockRestore();
   });
 });
