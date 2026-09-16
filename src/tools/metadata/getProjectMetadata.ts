@@ -45,7 +45,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
           ],
         };
       } catch (error) {
-        handleToolError(error, log);
+        handleToolError(error, log, { tool: "peaka_get_project_metadata" });
       }
     },
   });

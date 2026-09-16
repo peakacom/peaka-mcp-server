@@ -31,7 +31,7 @@ export const registerDeleteQueryTool: ToolRegister = (server) => {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
       } catch (error) {
-        handleToolError(error, log);
+        handleToolError(error, log, { tool: "peaka_delete_query" });
       }
     },
   });
