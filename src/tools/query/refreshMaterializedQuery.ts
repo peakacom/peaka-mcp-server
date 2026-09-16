@@ -36,7 +36,7 @@ export const registerRefreshMaterializedQueryTool: ToolRegister = (server) => {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
       } catch (error) {
-        handleToolError(error, log);
+        handleToolError(error, log, { tool: "peaka_refresh_materialized_query" });
       }
     },
   });

@@ -96,7 +96,7 @@ export const registerListProjectsTool: ToolRegister = (server) => {
           ],
         };
       } catch (error) {
-        handleToolError(error, log);
+        handleToolError(error, log, { tool: "peaka_list_projects" });
       }
     },
   });
