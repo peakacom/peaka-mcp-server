@@ -16,7 +16,17 @@ export const PROJECT_ID_HINT =
 
 // Auto-refresh schedule for MATERIALIZED queries. Two forms: a fixed interval
 // (ISO-8601 duration) or a cron expression with an IANA timezone.
-export const QUERY_SCHEDULE_SCHEMA = z
+//
+// A factory, not a shared const: the JSON Schema converter dedupes two fields
+// that reference the SAME schema instance into a sibling `$ref` (the second
+// field becomes {$ref: "#/properties/<first>"}). Some MCP clients (Claude
+// among them) don't resolve that intra-schema `$ref`, drop the field's type,
+// and serialize the object argument as a JSON string — which then fails our
+// validation ("expected object, received string"). Calling this per field
+// gives each its own instance, so every field is emitted inline with a full
+// object type and no client has a `$ref` to mishandle.
+export const queryScheduleSchema = () =>
+  z
   .discriminatedUnion("type", [
     z.object({
       type: z.literal("interval"),
@@ -53,7 +63,10 @@ export const ISO8601_DURATION =
 // Auto-refresh schedule for a cache. {type:'BASIC', expression} sets a
 // recurring refresh; {type:'NONE'} disables it. Matches the REST cache-settings
 // API, which uses type: "NONE" (expression omitted) to turn a schedule off.
-export const CACHE_SCHEDULE_SCHEMA = z
+// A factory per field, not a shared const — see queryScheduleSchema for why
+// (avoids the deduped `$ref` some clients mishandle).
+export const cacheScheduleSchema = () =>
+  z
   .discriminatedUnion("type", [
     z.object({
       type: z.literal("BASIC"),
