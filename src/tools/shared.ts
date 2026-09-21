@@ -1,5 +1,15 @@
 import { z } from "zod";
-import type { ProjectMetadataResponse, ColumnMetadata } from "../types";
+import type { ProjectMetadataResponse, ColumnMetadata, PeakaSession } from "../types";
+
+/**
+ * `canAccess` gate for write tools. On a read-only connection
+ * (`?readonly=true`) fastmcp drops the tool from tools/list and refuses to
+ * call it. Strictly subtractive: it can only hide a write tool, never grant
+ * one, so a caller can at most under-privilege itself. In stdio mode `auth`
+ * is undefined and every tool is exposed.
+ */
+export const requireWrite = (auth: PeakaSession | undefined): boolean =>
+  !auth?.readonly;
 
 export const PROJECT_ID_HINT =
   "If you do not already know the projectId for the current task, call peaka_list_projects first and ask the user which project to use. Remember the chosen projectId for subsequent calls in this conversation.";

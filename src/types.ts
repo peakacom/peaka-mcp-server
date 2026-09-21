@@ -1,5 +1,12 @@
 export interface PeakaSession {
   accessToken: string;
+  /**
+   * True when the connection opted into read-only mode via `?readonly=true`
+   * on the MCP endpoint. Write tools are hidden (not listed, not callable)
+   * for such connections. Self-asserted by the caller and strictly
+   * subtractive — it can only remove tools, never grant them.
+   */
+  readonly?: boolean;
   [key: string]: unknown;
 }
 

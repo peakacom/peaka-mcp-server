@@ -183,6 +183,27 @@ describe("createAuthenticator", () => {
     expect(session.accessToken).toBe(token);
   });
 
+  describe("readonly query parameter", () => {
+    const sessionFor = async (url?: string) => {
+      const token = await sign({ sub: "u", scope: ["user_access"] });
+      return auth()({ headers: headers(`Bearer ${token}`), url });
+    };
+
+    it.each([
+      ["/mcp?readonly=true", true],
+      ["/mcp?readonly=1", true],
+      ["/mcp?readonly", true],
+      ["/mcp?readonly=false", false],
+      ["/mcp?readonly=0", false],
+      ["/mcp?foo=bar", false],
+      ["/mcp", false],
+      [undefined, false],
+    ])("url %s -> readonly=%s", async (url, expected) => {
+      const session = await sessionFor(url as string | undefined);
+      expect(session.readonly).toBe(expected);
+    });
+  });
+
   it("logs the specific failure (iss mismatch) and never logs the token", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     // valid signature, but the issuer does not match config.issuer

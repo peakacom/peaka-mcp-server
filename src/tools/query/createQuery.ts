@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, QUERY_SCHEDULE_SCHEMA } from "../shared";
+import { PROJECT_ID_HINT, QUERY_SCHEDULE_SCHEMA, requireWrite } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
 
@@ -17,6 +17,7 @@ export const registerCreateQueryTool: ToolRegister = (server) => {
       readOnlyHint: false,
       destructiveHint: false,
     },
+    canAccess: requireWrite,
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       displayName: z
