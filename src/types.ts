@@ -10,13 +10,6 @@ export interface PeakaSession {
   [key: string]: unknown;
 }
 
-export interface ProjectInfoResponse {
-  projectId?: string;
-  projectName?: string;
-  userId: string;
-  email: string;
-}
-
 export interface GoldenSqlResult {
   result: GoldenSql[];
 }
@@ -380,25 +373,6 @@ export enum RelationshipType {
   OneToOne = "ONE_TO_ONE",
 }
 
-export interface Organization {
-  id: string;
-  name: string;
-  owner: string;
-  createdAt: string;
-  iconFileId: string | null;
-  description: string | null;
-}
-
-export interface Workspace {
-  id: string;
-  name: string;
-  createdBy: string;
-  organizationId: string;
-  description: string | null;
-  createdAt: string;
-  defaultWorkspace: boolean;
-}
-
 export interface Project {
   id: string;
   name: string;
@@ -407,16 +381,9 @@ export interface Project {
   webhookBaseUrl: string | null;
   createdAt: string;
   owner: string;
-  workspaceId: string;
-}
-
-export interface ProjectListItem {
-  organizationId: string;
-  organizationName: string;
-  workspaceId: string;
-  workspaceName: string;
-  projectId: string;
-  projectName: string;
+  // Null for projects not attached to a workspace (e.g. shared projects), as
+  // returned by the flat GET /projects endpoint.
+  workspaceId: string | null;
 }
 
 export interface MetadataRefreshResponse {

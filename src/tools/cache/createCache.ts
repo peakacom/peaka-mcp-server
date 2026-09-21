@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, CACHE_SCHEDULE_SCHEMA, requireWrite } from "../shared";
+import { PROJECT_ID_HINT, cacheScheduleSchema, requireWrite } from "../shared";
 import type { ToolRegister } from "../types";
 import type { CreateCacheRequest } from "../../types";
 import { handleToolError } from "../../error";
@@ -24,10 +24,10 @@ export const registerCreateCacheTool: ToolRegister = (server) => {
       catalogId: z.string(),
       schemaName: z.string(),
       tableName: z.string(),
-      incrementalSchedule: CACHE_SCHEDULE_SCHEMA.optional().describe(
+      incrementalSchedule: cacheScheduleSchema().optional().describe(
         "Optional incremental refresh schedule. {type: 'BASIC', expression: 'PT6H'} for recurring, or {type: 'NONE'} to leave it off. Omit to leave unset."
       ),
-      fullRefreshSchedule: CACHE_SCHEDULE_SCHEMA.optional().describe(
+      fullRefreshSchedule: cacheScheduleSchema().optional().describe(
         "Optional full refresh schedule. {type: 'BASIC', expression: 'P7D'} for recurring, or {type: 'NONE'} to leave it off. Omit to leave unset."
       ),
     }),

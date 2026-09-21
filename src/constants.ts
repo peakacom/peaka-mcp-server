@@ -241,21 +241,7 @@ export const TRANSPILE_TRINO_SQL_URL_TEMPLATE = ({
   dialect: string;
 }) => `sql/transpile/${dialect}`;
 
-export const LIST_ORGANIZATIONS_URL = () => `organizations`;
-
-export const LIST_WORKSPACES_URL_TEMPLATE = ({
-  organizationId,
-}: {
-  organizationId: string;
-}) => `organizations/${organizationId}/workspaces`;
-
-export const LIST_PROJECTS_URL_TEMPLATE = ({
-  organizationId,
-  workspaceId,
-}: {
-  organizationId: string;
-  workspaceId: string;
-}) => `organizations/${organizationId}/workspaces/${workspaceId}/projects`;
+export const LIST_ALL_PROJECTS_URL = () => `projects`;
 
 export const LIST_CONNECTIONS_URL_TEMPLATE = ({
   projectId,

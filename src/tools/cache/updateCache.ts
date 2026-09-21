@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, CACHE_SCHEDULE_SCHEMA, requireWrite } from "../shared";
+import { PROJECT_ID_HINT, cacheScheduleSchema, requireWrite } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
 
@@ -26,10 +26,10 @@ export const registerUpdateCacheTool: ToolRegister = (server) => {
         .describe(
           "The cache ID to update. Available from peaka_get_cache_statuses."
         ),
-      incrementalSchedule: CACHE_SCHEDULE_SCHEMA.describe(
+      incrementalSchedule: cacheScheduleSchema().describe(
         "Incremental refresh schedule. Required — replaces the existing value. {type: 'BASIC', expression: 'PT6H'} for recurring, or {type: 'NONE'} to disable."
       ),
-      fullRefreshSchedule: CACHE_SCHEDULE_SCHEMA.describe(
+      fullRefreshSchedule: cacheScheduleSchema().describe(
         "Full refresh schedule. Required — replaces the existing value. {type: 'BASIC', expression: 'P7D'} for recurring, or {type: 'NONE'} to disable."
       ),
     }),

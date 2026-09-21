@@ -1,7 +1,7 @@
 import { UserError } from "fastmcp";
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, QUERY_SCHEDULE_SCHEMA, requireWrite } from "../shared";
+import { PROJECT_ID_HINT, queryScheduleSchema, requireWrite } from "../shared";
 import type { ToolRegister } from "../types";
 import type { UpdateQueryRequest } from "../../types";
 import { handleToolError } from "../../error";
@@ -34,7 +34,7 @@ export const registerUpdateQueryTool: ToolRegister = (server) => {
         .string()
         .optional()
         .describe("New Trino SQL body for the saved query."),
-      schedule: QUERY_SCHEDULE_SCHEMA.optional(),
+      schedule: queryScheduleSchema().optional(),
     }),
     execute: async (args, { log, session }) => {
       try {
