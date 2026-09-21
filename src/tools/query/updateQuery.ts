@@ -1,7 +1,7 @@
 import { UserError } from "fastmcp";
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, QUERY_SCHEDULE_SCHEMA } from "../shared";
+import { PROJECT_ID_HINT, QUERY_SCHEDULE_SCHEMA, requireWrite } from "../shared";
 import type { ToolRegister } from "../types";
 import type { UpdateQueryRequest } from "../../types";
 import { handleToolError } from "../../error";
@@ -20,6 +20,7 @@ export const registerUpdateQueryTool: ToolRegister = (server) => {
       destructiveHint: false,
       idempotentHint: true,
     },
+    canAccess: requireWrite,
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       queryId: z

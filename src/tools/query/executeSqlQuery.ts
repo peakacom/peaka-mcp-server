@@ -14,7 +14,7 @@ export const registerExecuteSqlQueryTool: ToolRegister = (server) => {
       1: Use peaka_get_project_metadata to determine which tables should be used in the query and their schemas.
       2: Use peaka_list_tables to determine if the tables of interest are cached or not (this response has isCached property)
       3: If one or more tables that you need to query are cacheable but not cached:
-        3a: Warn the user that the results will be limited and ask if you should start the caching process for those tables, and start the caching process using the create cache tool
+        3a: Warn the user that the results will be limited and, if caching tools are available in this session, offer to start caching those tables before querying
         3b: If the caching is rejected by the user, warn them that the query results will be limited and use LIMIT statements on the query to make sure it doesn't run forever
 
     ${PROJECT_ID_HINT}`,

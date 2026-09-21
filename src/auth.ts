@@ -5,6 +5,23 @@ import type { PeakaSession } from "./types";
 export type TokenErrorKind = "invalid_token" | "insufficient_scope";
 
 /**
+ * Read-only opt-in via the `readonly` query parameter on the MCP endpoint
+ * (e.g. `/mcp?readonly=true`). Present-and-truthy (`true`, `1`, or bare
+ * `?readonly`) turns it on; anything else, including `readonly=false` and an
+ * absent param, leaves the connection at full access. Caller-asserted and
+ * strictly subtractive — it only ever hides write tools.
+ */
+function isReadonlyRequest(url: string | undefined): boolean {
+  if (!url) return false;
+  try {
+    const value = new URL(url, "http://localhost").searchParams.get("readonly");
+    return value === "true" || value === "1" || value === "";
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Raised by {@link verifyAccessToken} when a token fails validation. `kind`
  * maps to the OAuth `WWW-Authenticate` error and the HTTP status the transport
  * should return (401 for `invalid_token`, 403 for `insufficient_scope`).
@@ -215,8 +232,12 @@ function presentedIdentifiers(token: string): { iss: string; aud: string; scope:
  * explicit `:443` port) are obvious. The bearer token is never logged.
  */
 export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey) {
-  return async (request: { headers: IncomingHttpHeaders }): Promise<PeakaSession> => {
+  return async (request: {
+    headers: IncomingHttpHeaders;
+    url?: string;
+  }): Promise<PeakaSession> => {
     const resourceMetadata = resourceMetadataUrl(request.headers);
+    const readonly = isReadonlyRequest(request.url);
     const host = logSafe(
       firstHeader(request.headers["x-forwarded-host"]) ?? request.headers.host,
     );
@@ -234,7 +255,8 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
 
     const token = authHeader.slice(7);
     try {
-      return await verifyAccessToken(token, config, keySet);
+      const session = await verifyAccessToken(token, config, keySet);
+      return { ...session, readonly };
     } catch (err) {
       if (err instanceof TokenError) {
         const presented = presentedIdentifiers(token);

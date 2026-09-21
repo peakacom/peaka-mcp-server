@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, CACHE_SCHEDULE_SCHEMA } from "../shared";
+import { PROJECT_ID_HINT, CACHE_SCHEDULE_SCHEMA, requireWrite } from "../shared";
 import type { ToolRegister } from "../types";
 import type { CreateCacheRequest } from "../../types";
 import { handleToolError } from "../../error";
@@ -18,6 +18,7 @@ export const registerCreateCacheTool: ToolRegister = (server) => {
       readOnlyHint: false,
       destructiveHint: false,
     },
+    canAccess: requireWrite,
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z.string(),
