@@ -1,6 +1,7 @@
 import type { IncomingHttpHeaders } from "http";
 import { jwtVerify, decodeJwt, type JWTPayload, type JWTVerifyGetKey } from "jose";
 import type { PeakaSession } from "./types";
+import { DEFAULT_TIMEOUT_MS, MAX_TIMEOUT_SECONDS } from "./constants";
 
 export type TokenErrorKind = "invalid_token" | "insufficient_scope";
 
@@ -18,6 +19,31 @@ function isReadonlyRequest(url: string | undefined): boolean {
     return value === "true" || value === "1" || value === "";
   } catch {
     return false;
+  }
+}
+
+/**
+ * Per-connection request timeout from the `timeoutSeconds` query parameter on
+ * the MCP endpoint (e.g. `/mcp?timeoutSeconds=120`), returned in ms. Lets a
+ * slow or on-prem deployment be tuned from the URL without a rebuild. Falls
+ * back to {@link DEFAULT_TIMEOUT_MS} when absent, invalid (non-numeric, zero,
+ * or negative), or above {@link MAX_TIMEOUT_SECONDS}.
+ */
+function timeoutMsFromRequest(url: string | undefined): number {
+  if (!url) return DEFAULT_TIMEOUT_MS;
+  try {
+    const raw = new URL(url, "http://localhost").searchParams.get(
+      "timeoutSeconds"
+    );
+    if (!raw) return DEFAULT_TIMEOUT_MS;
+    const seconds = Number(raw);
+    return Number.isFinite(seconds) &&
+      seconds > 0 &&
+      seconds <= MAX_TIMEOUT_SECONDS
+      ? seconds * 1000
+      : DEFAULT_TIMEOUT_MS;
+  } catch {
+    return DEFAULT_TIMEOUT_MS;
   }
 }
 
@@ -238,6 +264,7 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
   }): Promise<PeakaSession> => {
     const resourceMetadata = resourceMetadataUrl(request.headers);
     const readonly = isReadonlyRequest(request.url);
+    const timeoutMs = timeoutMsFromRequest(request.url);
     const host = logSafe(
       firstHeader(request.headers["x-forwarded-host"]) ?? request.headers.host,
     );
@@ -256,7 +283,7 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
     const token = authHeader.slice(7);
     try {
       const session = await verifyAccessToken(token, config, keySet);
-      return { ...session, readonly };
+      return { ...session, readonly, timeoutMs };
     } catch (err) {
       if (err instanceof TokenError) {
         const presented = presentedIdentifiers(token);

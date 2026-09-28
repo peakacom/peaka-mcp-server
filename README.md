@@ -132,6 +132,18 @@ You can use following environment variable for configuration:
 | OAUTH_REQUIRED_SCOPE | Scope an access token must carry to be accepted (httpStream mode). | `user_access`             |
 | OAUTH_RESOURCE       | Expected token audience (this MCP server's resource URL). When set, tokens whose `aud` does not match are rejected. Leave unset until the authorization server binds `aud` to the resource. | -                    |
 
+## Request timeout (httpStream)
+
+The Partner API request timeout defaults to **60 seconds**. Override it per
+connection with the `timeoutSeconds` query parameter on the MCP endpoint URL —
+for example `https://mcp.peaka.studio/mcp?timeoutSeconds=120`. This lets a slow
+or on-prem deployment be tuned from the URL without a rebuild.
+
+The maximum is **600 seconds** (10 minutes). A value above the maximum, or an
+absent/invalid one (non-numeric, zero, negative), falls back to the 60s default
+rather than being clamped — so a unit mistake like `timeoutSeconds=60000` (meant
+as milliseconds) can't hold a request open for hours.
+
 ## Contact
 
 For feature requests and bugs, please create an issue in this repo. For further support, see the following resources:

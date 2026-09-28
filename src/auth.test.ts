@@ -204,6 +204,30 @@ describe("createAuthenticator", () => {
     });
   });
 
+  describe("timeoutSeconds query parameter (seconds -> ms, default 60s, max 600s)", () => {
+    const sessionFor = async (url?: string) => {
+      const token = await sign({ sub: "u", scope: ["user_access"] });
+      return auth()({ headers: headers(`Bearer ${token}`), url });
+    };
+
+    it.each([
+      ["/mcp?timeoutSeconds=120", 120000],
+      ["/mcp?timeoutSeconds=5", 5000],
+      ["/mcp?timeoutSeconds=600", 600000], // at the max
+      ["/mcp?timeoutSeconds=601", 60000], // above max -> default
+      ["/mcp?timeoutSeconds=60000", 60000], // ms-by-mistake -> default
+      ["/mcp", 60000], // default
+      ["/mcp?timeout=120", 60000], // old name is not honored
+      ["/mcp?timeoutSeconds=0", 60000], // invalid -> default
+      ["/mcp?timeoutSeconds=-5", 60000], // invalid -> default
+      ["/mcp?timeoutSeconds=abc", 60000], // invalid -> default
+      [undefined, 60000], // no url -> default
+    ])("url %s -> timeoutMs=%s", async (url, expected) => {
+      const session = await sessionFor(url as string | undefined);
+      expect(session.timeoutMs).toBe(expected);
+    });
+  });
+
   it("logs the specific failure (iss mismatch) and never logs the token", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     // valid signature, but the issuer does not match config.issuer

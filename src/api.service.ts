@@ -62,6 +62,7 @@ import {
   UPDATE_QUERY_URL_TEMPLATE,
   DELETE_QUERY_URL_TEMPLATE,
   DEFAULT_PEAKA_PARTNER_API_BASE_URL,
+  DEFAULT_TIMEOUT_MS,
   LIST_CATALOGS_URL_TEMPLATE,
   LIST_COLUMNS_URL_TEMPLATE,
   LIST_ALL_PROJECTS_URL,
@@ -78,22 +79,25 @@ import {
 export interface APIServiceOptions {
   accessToken: string;
   baseUrl?: string;
+  /** Request timeout in ms. Defaults to {@link DEFAULT_TIMEOUT_MS}. */
+  timeoutMs?: number;
 }
 
 export class APIService {
   private axiosInstance: AxiosInstance;
 
   constructor(options: APIServiceOptions) {
-    const { accessToken, baseUrl } = options;
+    const { accessToken, baseUrl, timeoutMs } = options;
 
     let baseURL = baseUrl || DEFAULT_PEAKA_PARTNER_API_BASE_URL;
 
     if (!baseURL.endsWith("/")) {
       baseURL += "/";
     }
+
     this.axiosInstance = axios.create({
       baseURL,
-      timeout: 15000,
+      timeout: timeoutMs ?? DEFAULT_TIMEOUT_MS,
     });
     this.axiosInstance.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -469,11 +473,9 @@ export class APIService {
       projectId,
     });
 
-    const response = await this.axiosInstance.post<QueryResult>(
-      url,
-      { statement },
-      { timeout: 20000 }
-    );
+    const response = await this.axiosInstance.post<QueryResult>(url, {
+      statement,
+    });
     return response.data;
   }
 
@@ -512,8 +514,7 @@ export class APIService {
 
     const response = await this.axiosInstance.post<MetadataRefreshResponse>(
       url,
-      { catalogId },
-      { timeout: 30000 }
+      { catalogId }
     );
     return response.data;
   }
