@@ -7,6 +7,12 @@ export interface PeakaSession {
    * subtractive — it can only remove tools, never grant them.
    */
   readonly?: boolean;
+  /**
+   * Per-connection request timeout in ms, from the `timeoutSeconds` query
+   * parameter on the MCP endpoint (`?timeoutSeconds=<n>`, max 600). Defaults
+   * to {@link DEFAULT_TIMEOUT_MS} when absent, invalid, or above the max.
+   */
+  timeoutMs?: number;
   [key: string]: unknown;
 }
 

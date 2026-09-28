@@ -3,6 +3,17 @@ export const DEFAULT_PEAKA_PARTNER_API_BASE_URL =
 
 export const DEFAULT_PORT = 3000;
 
+// Default request timeout (ms) applied to all Partner API calls. Overridable
+// per connection via the `timeoutSeconds` query parameter on the MCP endpoint
+// (e.g. `<mcp-url>?timeoutSeconds=120`), so a slow or on-prem deployment
+// (e.g. Turkcell) can be tuned from the URL without a rebuild.
+export const DEFAULT_TIMEOUT_MS = 60000;
+
+// Upper bound for `timeoutSeconds`. Values above it fall back to the default,
+// so a unit mistake (e.g. `timeoutSeconds=60000` meant as ms) can't hold a
+// request open for hours.
+export const MAX_TIMEOUT_SECONDS = 600;
+
 export const QUERY_GOLDEN_SQL_URL_TEMPLATE = ({
   projectId,
   query,

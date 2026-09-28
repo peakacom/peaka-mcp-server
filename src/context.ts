@@ -12,6 +12,7 @@ export function resolveService(session: PeakaSession | undefined): APIService {
     return new APIService({
       accessToken: session.accessToken,
       baseUrl: process.env.PARTNER_API_BASE_URL,
+      timeoutMs: session.timeoutMs,
     });
   }
   const apiKey = process.env.PEAKA_API_KEY;
