@@ -9,7 +9,7 @@ export const registerCreateCacheBatchTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_create_cache_batch",
     description:
-      `Create caches for multiple tables in a single call. Use this instead of repeated peaka_create_cache calls when caching many tables — it avoids partial-failure states where some caches are created and others aren't. Each item supports the same optional schedule expressions as peaka_create_cache (ISO-8601 durations, e.g. PT6H, P1D, P7D, P30D).
+      `Create caches for multiple tables in a single call. Use this instead of repeated peaka_create_cache calls when caching many tables. Items are processed independently, so some can succeed while others fail: the response contains one entry per item with success, error, and the created cache. Check every entry and report or retry the failed ones rather than assuming the whole batch succeeded. Each item supports the same optional schedule expressions as peaka_create_cache (ISO-8601 durations, e.g. PT6H, P1D, P7D, P30D).
 
     ${PROJECT_ID_HINT}`,
     annotations: {
