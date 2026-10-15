@@ -20,6 +20,33 @@ function requestPath(error: AxiosError): string {
 }
 
 /**
+ * Error body returned by the Partner API. Current gateways send RFC 9457
+ * Problem Details (`application/problem+json`); older ones send
+ * `{errorCode | code, message, reason}`. Both are read so errors stay
+ * readable while gateways are rolled out.
+ */
+interface ApiErrorBody {
+  // Problem Details
+  title?: string;
+  detail?: string;
+  code?: string | number;
+  traceId?: string;
+  retryable?: boolean;
+  params?: Record<string, unknown>;
+  cause?: { code?: unknown; message?: unknown; location?: unknown };
+  // Legacy
+  errorCode?: string | number;
+  message?: string;
+  reason?: string;
+}
+
+/** Caps long upstream text (e.g. Trino's "Expecting: ..." lists) for the model. */
+function bounded(value: unknown, max = 1000): string | undefined {
+  if (typeof value !== "string" || value === "") return undefined;
+  return value.length > max ? `${value.slice(0, max)}…` : value;
+}
+
+/**
  * Normalizes a thrown tool error into the client-facing error AND writes a
  * server-side log line (`[tool-error]` on stderr) so failures are visible in
  * the server's own logs, not only returned to the caller. Pass `context.tool`
@@ -40,22 +67,53 @@ export function handleToolError(
 
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
-    const data = (error.response?.data ?? {}) as {
-      code?: number;
-      message?: string;
-      reason?: string;
-    };
+    const raw = error.response?.data;
+    // Non-JSON bodies (e.g. an HTML page from a proxy) carry nothing usable.
+    const data: ApiErrorBody = raw && typeof raw === "object" ? raw : {};
+
+    const code = data.code ?? data.errorCode ?? status;
+    const message =
+      bounded(data.detail) ??
+      bounded(data.message) ??
+      bounded(data.title) ??
+      error.message;
+    const cause =
+      data.cause && typeof data.cause === "object"
+        ? {
+            ...(data.cause.code !== undefined ? { code: data.cause.code } : {}),
+            ...(bounded(data.cause.message)
+              ? { message: bounded(data.cause.message) }
+              : {}),
+            ...(data.cause.location !== undefined
+              ? { location: data.cause.location }
+              : {}),
+          }
+        : undefined;
+
     console.error(
       `[tool-error] ${where}type=http status=${status ?? "?"} ` +
+        `code=${logSafe(code ?? "?")} ` +
         `request="${requestPath(error)}" ` +
-        `message="${logSafe(data.message ?? error.message)}"` +
+        `message="${logSafe(message)}"` +
+        (data.traceId ? ` traceId=${logSafe(data.traceId)}` : "") +
         (data.reason ? ` reason="${logSafe(data.reason)}"` : ""),
     );
-    logger?.error(error.message);
+    logger?.error(message);
+
+    // Fields are picked explicitly: `debug` (stack traces, internal paths)
+    // and `instance`/`type` are never forwarded to the client.
     throw new UserError(
       JSON.stringify({
-        code: data.code ?? status,
-        message: data.message ?? error.message,
+        code,
+        ...(status !== undefined ? { status } : {}),
+        message,
+        ...(typeof data.retryable === "boolean"
+          ? { retryable: data.retryable }
+          : {}),
+        ...(data.params && typeof data.params === "object"
+          ? { params: data.params }
+          : {}),
+        ...(cause && Object.keys(cause).length > 0 ? { cause } : {}),
         ...(data.reason ? { reason: data.reason } : {}),
       }),
     );
