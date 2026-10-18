@@ -8,7 +8,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_get_project_metadata",
     description:
-      `Get project metadata, preferably scoped by catalogId and/or schemaName. For a data question, start with peaka_search_relevant_tables and fetch the scope you need. An unfiltered call can return a large response. If metadata is missing, use peaka_list_schemas, peaka_list_tables and peaka_list_columns; missing metadata does not mean no data.
+      `Get project metadata, preferably scoped by catalogId and/or schemaName. For metadata management, prefer peaka_list_table_metadata for one bounded page. For a data question, start with peaka_search_relevant_tables and fetch the scope you need. An unfiltered call can return a large response. If metadata is missing, use peaka_list_schemas, peaka_list_tables and peaka_list_columns; missing metadata does not mean no data.
 
     ${PROJECT_ID_HINT}`,
     annotations: {
