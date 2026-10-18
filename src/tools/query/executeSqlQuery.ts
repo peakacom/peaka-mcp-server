@@ -11,7 +11,7 @@ export const registerExecuteSqlQueryTool: ToolRegister = (server) => {
       `Runs the given sql query on Peaka.
 
     BEFORE RUNNING THIS TOOL:
-      1: Use peaka_get_project_metadata to determine which tables should be used in the query and their schemas.
+      1: Use peaka_search_relevant_tables to find candidate tables, then fetch only the needed metadata scope or columns. If search is unavailable or unhelpful, use catalog/schema/table discovery.
       2: Use peaka_list_tables to determine if the tables of interest are cached or not (this response has isCached property)
       3: If one or more tables that you need to query are cacheable but not cached:
         3a: Warn the user that the results will be limited and, if caching tools are available in this session, offer to start caching those tables before querying

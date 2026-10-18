@@ -36,6 +36,7 @@ import {
   MaterializedQueryStatus,
   QueryResult,
   TableMetadataResult,
+  RelevantTablesResponse,
 } from "./types";
 import {
   CREATE_CACHE_URL_TEMPLATE,
@@ -115,6 +116,12 @@ export class APIService {
     });
 
     const response = await this.axiosInstance.get<GoldenSqlResult>(url);
+    return response.data;
+  }
+
+  public async searchRelevantTables(projectId: string, question: string, limit = 5): Promise<RelevantTablesResponse> {
+    const response = await this.axiosInstance.get<RelevantTablesResponse>(
+      `metadata/${encodeURIComponent(projectId)}/relevant-tables`, { params: { question, limit } });
     return response.data;
   }
 

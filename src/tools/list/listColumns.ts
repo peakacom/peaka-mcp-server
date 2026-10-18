@@ -8,7 +8,7 @@ export const registerListColumnsTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_list_columns",
     description:
-      `List all columns for a given table in the Peaka project. Returns column names, data types, and constraints. Use peaka_get_project_metadata first to discover available catalogs, schemas, and tables.
+      `List all columns for a given table in the Peaka project. Returns column names, data types, and constraints. Use this directly when the table is known, or after peaka_search_relevant_tables or catalog/schema/table discovery.
 
     ${PROJECT_ID_HINT}`,
     annotations: {
