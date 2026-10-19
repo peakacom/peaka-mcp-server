@@ -20,4 +20,11 @@ describe("bounded management tools",()=>{
   const r=await t.execute({projectId:"p",runId},{log:{},session:{}});
   expect(mock.operation).toHaveBeenCalledWith("p",runId);expect(JSON.parse(r.content[0].text).status).toBe("partially_completed");
  });
+ it("search's UUID case: a cursor is taken only as issued, a run id is lowercased (DEV-4133)",()=>{
+  const list=tool(registerListTableMetadataTool);
+  expect(()=>list.parameters.parse({projectId:"p",cursor:"12345678-1234-1234-1234-123456789ABC"})).toThrow();
+  expect(list.parameters.parse({projectId:"p",cursor:"12345678-1234-1234-1234-123456789abc"}).cursor).toBe("12345678-1234-1234-1234-123456789abc");
+  const operation=tool(registerGetMetadataOperationTool);
+  expect(operation.parameters.parse({projectId:"p",runId:"12345678-1234-1234-1234-123456789ABC"}).runId).toBe("12345678-1234-1234-1234-123456789abc");
+ });
 });
