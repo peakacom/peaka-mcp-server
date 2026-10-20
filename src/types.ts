@@ -40,6 +40,9 @@ export interface ProjectMetadataEntry {
   metadata: TableMetadata;
 }
 
+export const METADATA_FORMATS = ["compact", "ddl"] as const;
+export type MetadataFormat = (typeof METADATA_FORMATS)[number];
+
 export interface ProjectMetadataResponse {
   metadata: ProjectMetadataEntry[];
 }
