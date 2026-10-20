@@ -2,13 +2,17 @@ import { z } from "zod";
 import { resolveService } from "../../context";
 import { PROJECT_ID_HINT, filterMetadataResponse } from "../shared";
 import type { ToolRegister } from "../types";
+import { UserError } from "fastmcp";
 import { handleToolError } from "../../error";
+import { METADATA_FORMATS } from "../../types";
 
 export const registerGetProjectMetadataTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_get_project_metadata",
     description:
       `Get project metadata, preferably scoped by catalogId and/or schemaName. For a data question, start with peaka_search_relevant_tables and fetch the scope you need. An unfiltered call can return a large response. If metadata is missing, use peaka_list_schemas, peaka_list_tables and peaka_list_columns; missing metadata does not mean no data.
+
+    format makes the result much smaller: "compact" returns { tables: [{ table, desc, columns: [{ name, type, desc, pk, values }], relations }] } with the table names as written in SQL; "ddl" returns CREATE TABLE statements with descriptions as comments. Without format the full stored metadata is returned. includeSamples (with a format) adds distinct sample values to each column.
 
     ${PROJECT_ID_HINT}`,
     annotations: {
@@ -27,10 +31,29 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
         .string()
         .optional()
         .describe("Optional schema name to filter metadata by a specific schema."),
+      format: z
+        .enum(METADATA_FORMATS)
+        .optional()
+        .describe('Optional smaller result: "compact" (JSON) or "ddl" (CREATE TABLE text). Omit for the full stored metadata.'),
+      includeSamples: z
+        .boolean()
+        .optional()
+        .describe("With format: add distinct sample values of each column."),
     }),
     execute: async (args, { log, session }) => {
       try {
         const svc = resolveService(session);
+        if (args.includeSamples && !args.format) {
+          throw new UserError('includeSamples needs format "compact" or "ddl".');
+        }
+        if (args.format) {
+          const text = await svc.getProjectMetadataAs(args.projectId, args.format, {
+            catalogId: args.catalogId,
+            schemaName: args.schemaName,
+            includeSamples: args.includeSamples,
+          });
+          return { content: [{ type: "text", text }] };
+        }
         const result = await svc.getProjectMetadata(
           args.projectId,
           args.catalogId,

@@ -7,6 +7,7 @@ import {
   MetadataRefreshStatusResponse,
   Project,
   ProjectMetadataResponse,
+  MetadataFormat,
   QueryContainer,
   Schema,
   Table,
@@ -171,6 +172,34 @@ export class APIService {
 
     const response = await this.axiosInstance.get<ProjectMetadataResponse>(url, { params });
     return response.data;
+  }
+
+  /**
+   * The project metadata in a smaller shape: format=compact returns { tables: [...] } (names, types, descriptions,
+   * keys, values, relations), format=ddl returns CREATE TABLE text. Sample values come only with includeSamples.
+   */
+  public async getProjectMetadataAs(
+    projectId: string,
+    format: MetadataFormat,
+    options: { catalogId?: string; schemaName?: string; includeSamples?: boolean } = {}
+  ): Promise<string> {
+    const url = GET_PROJECT_METADATA_URL_TEMPLATE({
+      projectId,
+    });
+
+    const params: Record<string, string> = { format };
+    if (options.catalogId) {
+      params.catalogId = options.catalogId;
+    }
+    if (options.schemaName) {
+      params.schemaName = options.schemaName;
+    }
+    if (options.includeSamples) {
+      params.include = "samples";
+    }
+
+    const response = await this.axiosInstance.get<unknown>(url, { params });
+    return typeof response.data === "string" ? response.data : JSON.stringify(response.data);
   }
 
   public async listCatalogs(projectId: string): Promise<Catalog[]> {
