@@ -153,6 +153,16 @@ export class APIService {
     return result;
   }
 
+  public async listTableMetadata(projectId: string, params: {catalogId?: string; schemaName?: string; cursor?: string; limit?: number}) {
+    const response = await this.axiosInstance.get(`/metadata/${encodeURIComponent(projectId)}/tables`, {params});
+    return response.data;
+  }
+
+  public async getMetadataOperation(projectId: string, runId: string) {
+    const response = await this.axiosInstance.get(`/metadata/${encodeURIComponent(projectId)}/operations/${encodeURIComponent(runId)}`);
+    return response.data;
+  }
+
   public async getProjectMetadata(
     projectId: string,
     catalogId?: string,

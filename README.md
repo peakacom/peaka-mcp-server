@@ -151,3 +151,9 @@ as milliseconds) can't hold a request open for hours.
 For feature requests and bugs, please create an issue in this repo. For further support, see the following resources:
 
 - [Peaka Community Discord](https://discord.com/invite/peaka)
+
+### Paged metadata management (DEV-4102)
+
+`peaka_list_table_metadata` reads one page of authorized collected table summaries, including AI-excluded tables. It requires metadata management permission. Use `catalogId`, `schemaName` and `limit` (1–50, default20); continue with `nextCursor` and the same arguments. An empty page may still have `hasMore:true`. Cursors expire after15minutes; results are not a source inventory or consistent snapshot. Columns/samples/relations are not returned. Use ordinary discovery tools to inspect source structure.
+
+`peaka_get_metadata_operation` reads the exact refresh `runId` returned by admission. Only `done` means success; partial/cancelled/paused/failed results do not. Legacy metadata/status tools remain available. New tools require a gateway with these endpoints and fail explicitly on older servers; they never silently fetch the whole project or poll a different operation.
