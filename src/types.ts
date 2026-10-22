@@ -34,6 +34,24 @@ export interface TableMetadataResult {
   result: TableMetadata[];
 }
 
+export interface RelevantTablesResponse {
+  status: "ready" | "partial" | "empty" | "unavailable";
+  reason: string | null;
+  index: string;
+  coverage: "partial" | "unknown";
+  tables: {
+    projectId: string;
+    catalogId: string;
+    schemaName: string;
+    tableName: string;
+    catalog: string;
+    description: string;
+    columns: { name: string; type: string; description: string; primaryKey: boolean }[];
+    metadataReadiness: "source_verified";
+  }[];
+  nextAction: string;
+}
+
 export interface ProjectMetadataEntry {
   id: string;
   content: string;

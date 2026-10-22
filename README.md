@@ -25,6 +25,8 @@ Every project-scoped tool takes a `projectId` argument. If the MCP client does n
   - Query question/sql pairs from Peaka's golden sql vector store. If an existing query matches the user's question, it can be reused directly.
 - `peaka_execute_sql_query`
   - Runs the given sql query on Peaka.
+- `peaka_search_relevant_tables`
+  - Find up to 10 candidate tables for a question, with current accessible columns, descriptions and index coverage. Start here for data questions, then fetch metadata for the relevant scope. When the index is unavailable or results are unhelpful, use catalog/schema/table discovery. Requires the gateway's `/metadata/{projectId}/relevant-tables` endpoint; it does not execute SQL or rebuild the index.
 - `peaka_get_project_metadata`
   - Get metadata for all catalogs, schemas, and tables in the Peaka project in a single call. Optionally filter by `catalogId` and/or `schemaName`.
 - `peaka_list_catalogs`
