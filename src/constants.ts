@@ -1,3 +1,12 @@
+/** This server's version; also in package.json and manifest.json. */
+export const PEAKA_MCP_VERSION = "0.15.2";
+
+/**
+ * Sent with every Partner API call. The gateway passes it on, and Query History shows
+ * "Partner API · Peaka MCP 0.15.2" instead of axios's default agent.
+ */
+export const PEAKA_MCP_USER_AGENT = `peaka-mcp-server/${PEAKA_MCP_VERSION}`;
+
 export const DEFAULT_PEAKA_PARTNER_API_BASE_URL =
   "https://partner.peaka.studio/api/v1";
 

@@ -65,6 +65,7 @@ import {
   DELETE_QUERY_URL_TEMPLATE,
   DEFAULT_PEAKA_PARTNER_API_BASE_URL,
   DEFAULT_TIMEOUT_MS,
+  PEAKA_MCP_USER_AGENT,
   LIST_CATALOGS_URL_TEMPLATE,
   LIST_COLUMNS_URL_TEMPLATE,
   LIST_ALL_PROJECTS_URL,
@@ -100,6 +101,7 @@ export class APIService {
     this.axiosInstance = axios.create({
       baseURL,
       timeout: timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      headers: { "User-Agent": PEAKA_MCP_USER_AGENT },
     });
     this.axiosInstance.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${accessToken}`;
