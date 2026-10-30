@@ -2,7 +2,7 @@
 import { FastMCP } from "fastmcp";
 import { createRemoteJWKSet } from "jose";
 import "dotenv/config";
-import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE, DEFAULT_PORT, PEAKA_MCP_VERSION } from "./constants";
+import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE, DEFAULT_PORT, PEAKA_MCP_VERSION, PEAKA_SERVER_INSTRUCTIONS } from "./constants";
 import type { PeakaSession } from "./types";
 import { getMode } from "./context";
 import { loadAuthConfig, createAuthenticator } from "./auth";
@@ -30,6 +30,7 @@ const authenticate =
 const server = new FastMCP<PeakaSession>({
   name: "Peaka",
   version: PEAKA_MCP_VERSION,
+  instructions: PEAKA_SERVER_INSTRUCTIONS,
   ...(mode === "httpStream" && {
     authenticate,
     health: {

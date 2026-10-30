@@ -484,3 +484,17 @@ For Chart.js, set these as \`backgroundColor\` (with alpha \`33\` for fills) and
 8. Include a timestamp in the report header showing when the report was generated.
 9. Keep the grid responsive: use \`grid-2\` for KPI rows, \`grid-full\` for wide charts/tables.
 10. Every chart and table must have a descriptive \`.card-title\`.`;
+
+/**
+ * The MCP server's instructions: clients such as Claude Code put them in the model's prompt before any tool is loaded,
+ * while a tool's description is read only after the model has picked the tool by its name. So the route to a data
+ * question's tables is said here; the rules a single tool needs stay in its description.
+ */
+export const PEAKA_SERVER_INSTRUCTIONS = `Peaka answers data questions with SQL over a project's catalogs.
+
+To find the tables for a question, use two calls instead of listing catalogs, schemas, tables and columns one by one:
+1. peaka_list_project_tables lists every table of the project in one line each: catalog.schema.table, its cache state, a short description, column names and joins.
+2. peaka_get_project_metadata with tables=["catalog.schema.table", ...] returns the chosen tables' columns, types, descriptions and relations in one call.
+Then run SQL with peaka_execute_sql_query. If the project is too large to list, the first call returns its schemas: list one schema, or use peaka_search_relevant_tables.
+
+A table marked [not cached] is read live from its SaaS source, and a live read may return only its first page of records: say so instead of presenting it as the whole table.`;
