@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compactQueryResult } from "./queryResult";
+import { MAX_CELL_CHARS, MAX_RESULT_ROWS, boundQueryResult, compactQueryResult } from "./queryResult";
 import type { QueryResult } from "../../types";
 
 const column = (columnName: string) => ({
@@ -59,5 +59,38 @@ describe("compactQueryResult", () => {
     expect(JSON.stringify(compactQueryResult(result)).length).toBeLessThan(
       JSON.stringify(result).length / 4
     );
+  });
+});
+
+describe("boundQueryResult (DEV-4186)", () => {
+  const columns = [{ name: "id", type: "bigint" }, { name: "note", type: "varchar" }];
+
+  it("leaves a small result whole and says how many rows it has", () => {
+    expect(boundQueryResult({ columns, rows: [["1", "a"], ["2", null]] }, 40_000)).toEqual({
+      columns, rows: [["1", "a"], ["2", null]], returnedRows: 2, totalRows: 2,
+    });
+  });
+
+  it("shows the rows that fit, marks the cut and tells the model to aggregate", () => {
+    const rows = Array.from({ length: 5_000 }, (_, i) => [String(i), "x".repeat(50)]);
+    const bounded = boundQueryResult({ columns, rows }, 40_000);
+    expect(bounded.truncated).toBe(true);
+    expect(bounded.totalRows).toBe(5_000);
+    expect(bounded.returnedRows).toBe(bounded.rows.length);
+    expect(bounded.returnedRows).toBeLessThan(MAX_RESULT_ROWS + 1);
+    expect(JSON.stringify(bounded).length).toBeLessThanOrEqual(40_000);
+    expect(bounded.note).toMatch(/aggregate in SQL/);
+  });
+
+  it("caps the rows even when they are small", () => {
+    const rows = Array.from({ length: 2_000 }, (_, i) => [String(i), null]);
+    expect(boundQueryResult({ columns, rows }, 1_000_000).returnedRows).toBe(MAX_RESULT_ROWS);
+  });
+
+  it("cuts a long value and counts it", () => {
+    const bounded = boundQueryResult({ columns, rows: [["1", "y".repeat(MAX_CELL_CHARS + 10)]] }, 40_000);
+    expect(bounded.rows[0][1]).toBe(`${"y".repeat(MAX_CELL_CHARS)}… (+10 characters)`);
+    expect(bounded).toMatchObject({ truncatedCells: 1, returnedRows: 1, totalRows: 1 });
+    expect(bounded.truncated).toBeUndefined();
   });
 });

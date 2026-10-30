@@ -5,6 +5,7 @@ import "dotenv/config";
 import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE, DEFAULT_PORT, PEAKA_MCP_VERSION, PEAKA_SERVER_INSTRUCTIONS } from "./constants";
 import type { PeakaSession } from "./types";
 import { getMode } from "./context";
+import { budgetedServer } from "./tools/budget";
 import { loadAuthConfig, createAuthenticator } from "./auth";
 import {
   registerQueryTools,
@@ -39,13 +40,15 @@ const server = new FastMCP<PeakaSession>({
   }),
 });
 
-registerQueryTools(server);
-registerMetadataTools(server);
-registerCacheTools(server);
-registerListTools(server);
-registerTableTools(server);
-registerConnectionTools(server);
-registerSemanticTools(server);
+// Every tool answer within the response budget (DEV-4186).
+const tools = budgetedServer(server);
+registerQueryTools(tools);
+registerMetadataTools(tools);
+registerCacheTools(tools);
+registerListTools(tools);
+registerTableTools(tools);
+registerConnectionTools(tools);
+registerSemanticTools(tools);
 
 server.addResource({
   uri: "file:///peaka_sql_query_rule_set.txt",
