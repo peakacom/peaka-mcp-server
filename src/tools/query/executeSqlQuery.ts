@@ -14,9 +14,8 @@ export const registerExecuteSqlQueryTool: ToolRegister = (server) => {
     BEFORE RUNNING THIS TOOL:
       1: Find the tables with peaka_list_project_tables (one line a table, with its cache state), then read the chosen tables' columns with peaka_get_project_metadata and tables=[...] in one call. If the project is too large to list, list one schema or use peaka_search_relevant_tables.
       2: Check the tables' cache state in that list ([cached], [not cached], or no tag for sources always read live); peaka_list_tables gives it per schema too
-      3: If one or more tables that you need to query are cacheable but not cached:
-        3a: Warn the user that the results will be limited and, if caching tools are available in this session, offer to start caching those tables before querying
-        3b: If the caching is rejected by the user, warn them that the query results will be limited and use LIMIT statements on the query to make sure it doesn't run forever
+      3: A [not cached] table is a SaaS source read live, and a live read may return only its first page of records: say the result may be incomplete, and, if caching tools are available, offer to cache the table. Do not start a cache without the user's yes.
+      4: A table with no cache tag (e.g. Oracle or another database) is always read live and in full: caching does not make its answer more complete. If a query on it fails or is slow, fix or narrow the SQL, or report the error; do not try to cache it.
 
     ${PROJECT_ID_HINT}`,
     annotations: {

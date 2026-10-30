@@ -497,4 +497,4 @@ To find the tables for a question, use two calls instead of listing catalogs, sc
 2. peaka_get_project_metadata with tables=["catalog.schema.table", ...] returns the chosen tables' columns, types, descriptions and relations in one call.
 Then run SQL with peaka_execute_sql_query. If the project is too large to list, the first call returns its schemas: list one schema, or use peaka_search_relevant_tables.
 
-A table marked [not cached] is read live from its SaaS source, and a live read may return only its first page of records: say so instead of presenting it as the whole table.`;
+A table marked [not cached] is read live from its SaaS source, and a live read may return only its first page of records: say so instead of presenting it as the whole table. A table with no cache tag (e.g. a database such as Oracle) is read live and in full; caching it does not help. Do not create caches to work around a failing or slow query, and create one only when the user asks for it or agrees.`;
