@@ -401,9 +401,16 @@ export interface QueryResultCellValue {
   order: number;
 }
 
+/** A SaaS table a statement read and how (DEV-4186); database tables are not listed. */
+export interface QueryReadTable {
+  table: string;
+  cache: "live" | "preparing" | "ready" | "unknown" | string;
+}
+
 export interface QueryResult {
   columns: QueryResultColumn[];
   data: QueryResultCellValue[][];
+  tables?: QueryReadTable[];
 }
 
 export enum RelationshipType {

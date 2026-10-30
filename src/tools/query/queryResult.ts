@@ -1,8 +1,10 @@
-import type { QueryResult } from "../../types";
+import type { QueryReadTable, QueryResult } from "../../types";
 
 export interface CompactQueryResult {
   columns: { name: string; type: string | null }[];
   rows: (string | null)[][];
+  /** The SaaS tables read and how; only when the answer has them. */
+  tables?: QueryReadTable[];
 }
 
 /**
@@ -26,7 +28,7 @@ export const compactQueryResult = (result: QueryResult): CompactQueryResult => {
   const rows = data.map((row) =>
     [...row].sort((a, b) => a.order - b.order).map((cell) => cell.value ?? null)
   );
-  return { columns, rows };
+  return { columns, rows, ...(result.tables?.length ? { tables: result.tables } : {}) };
 };
 
 /** Rows shown to the model at most; past this, the SQL should aggregate. */
@@ -73,7 +75,15 @@ export const boundQueryResult = (result: CompactQueryResult, budgetChars: number
     size += rowSize;
   }
   const truncated = kept.length < rows.length;
+  const live = (result.tables ?? []).filter((table) => table.cache === "live").map((table) => table.table);
+  const preparing = (result.tables ?? []).filter((table) => table.cache === "preparing").map((table) => table.table);
   const notes = [
+    live.length
+      ? `${live.join(", ")} ${live.length > 1 ? "were" : "was"} read live from a SaaS source, and a live read may return only the first page of records: do not present the result as complete.`
+      : "",
+    preparing.length
+      ? `The cache of ${preparing.join(", ")} has not finished its first sync, so it may be empty or partial.`
+      : "",
     truncated
       ? `Only the first ${kept.length} of ${rows.length} rows are shown. Do not generalise from them: aggregate in SQL (COUNT, SUM, GROUP BY) or narrow it with WHERE.`
       : "",
@@ -81,6 +91,7 @@ export const boundQueryResult = (result: CompactQueryResult, budgetChars: number
   ].filter(Boolean);
   return {
     columns: result.columns,
+    ...(result.tables ? { tables: result.tables } : {}),
     rows: kept,
     returnedRows: kept.length,
     totalRows: rows.length,

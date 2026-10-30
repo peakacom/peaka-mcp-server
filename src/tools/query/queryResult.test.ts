@@ -94,3 +94,26 @@ describe("boundQueryResult (DEV-4186)", () => {
     expect(bounded.truncated).toBeUndefined();
   });
 });
+
+describe("read tables in query results (DEV-4186)", () => {
+  const columns = [{ name: "n", type: "bigint" }];
+
+  it("says when a SaaS table was read live or from a cache still filling", () => {
+    const bounded = boundQueryResult({
+      columns, rows: [["100"]],
+      tables: [
+        { table: "stripe.payment.invoices", cache: "live" },
+        { table: "stripe.payment.charges", cache: "preparing" },
+        { table: "stripe.payment.customers", cache: "ready" },
+      ],
+    }, 40_000);
+    expect(bounded.tables).toHaveLength(3);
+    expect(bounded.note).toContain("stripe.payment.invoices was read live");
+    expect(bounded.note).toContain("The cache of stripe.payment.charges has not finished");
+    expect(bounded.note).not.toContain("customers");
+  });
+
+  it("adds nothing for a result without SaaS tables", () => {
+    expect(boundQueryResult({ columns, rows: [["1"]] }, 40_000)).toEqual({ columns, rows: [["1"]], returnedRows: 1, totalRows: 1 });
+  });
+});

@@ -277,54 +277,22 @@ export const GET_CONNECTION_DETAIL_URL_TEMPLATE = ({
   connectionId: string;
 }) => `connections/${projectId}/${connectionId}/detail`;
 
-export const PEAKA_SQL_RULE_SET = `Double check the Trino SQL query above for common mistakes, including:
- -  Include catalog and schema prefices in your queries and wrap catalog and schema prefices with double quotes. Use table aliases. Wrap table names with double quotations if it contains spaces.
- -  Use single quotes for varchar columns.
-  - Using NOT IN with NULL values
-  - Using UNION when UNION ALL should have been used
-  - Using BETWEEN for exclusive ranges
-  - Data type mismatch in predicates
-  - Properly quoting identifiers
-  - Using the correct number of arguments for functions
-  - Casting to the correct data type
-  - Using the proper columns for joins
-  - Misspelling SQL keywords
-  - Forgetting Brackets and Quotes
-  - Specifying an Invalid Statement Order
-  - Omitting Table Aliases
-  - Using Case-Sensitive Names
-  - Incorrect order when writing queries
-  - Using UNION when UNION ALL should have been used
-  - Avoid NOT IN or IN and Use JOIN instead
-  - Incorrectly Using Wildcard
-  - Unbalanced Quotes
-  - The OR operator is not applied correctly
-  - Missing closing parenthesis in the WHERE clause
-  - Using double quotes instead of single quotes to define the string value
-  - Using a comma instead of the logical operator "AND" between two conditions in the WHERE clause
-  - Mismatched Column Names in JOIN
-  - Incorrect Syntax for LIMIT
-  - Invalid ORDER BY Column
-  - Missing Alias for Subquery
-  - Missing AS Keyword in Column Aliasing
-  - Do not use an alias defined in the SELECT clause in the GROUP BY clause. Instead, you should use the full expression that defines the alias Eg: The query "SELECT DATE_TRUNC('week', p.creationtime) AS week, c.title, COUNT(p.id) AS purchase_count FROM firebase.main.purchases p JOIN firebase.main.contents c ON c.id = JSON_EXTRACT_SCALAR(p.purchasedcontentids, '$[0]') WHERE p.creationtime >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1' month GROUP BY week, c.title" should be like this "SELECT DATE_TRUNC('week', p.creationtime) AS week, c.title, COUNT(p.id) AS purchase_count FROM firebase.main.purchases p JOIN firebase.main.contents c ON c.id = JSON_EXTRACT_SCALAR(p.purchasedcontentids, '$[0]') WHERE p.creationtime >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1' month GROUP BY DATE_TRUNC('week', p.creationtime), c.title"
-  - Incorrect Table Name Spelling
-  - Using Aggregate Functions without GROUP BY
-  - Incorrectly Using NOT IN
-  - Missing Comparison Operator
-  - Missing JOIN Condition
-  - Ambiguous Column Names
-  - Incorrect Syntax for CASE Statement
-  - Avoid using WHERE for Joining
-  - Avoid column names in GROUP BY statements and USE column order instead
-  - HAVING clause cannot contain window functions or row pattern measures.
-  - Provide SQL code using Trino's FROM_ISO8601_TIMESTAMP(string date) function only for columns of type varchar that contain valid date strings. Do not use FROM_ISO8601_TIMESTAMP on columns of type date, timestamp, or timestamp(n). Instead, handle those types directly without transformation. Be strict about this rule and ensure the type checking is followed.
-  - Do not use JSON_CONTAINS in your queries.
-  - DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
-  - Do not use date string for timestamp columns. 
-  - Put quotation only around numbers when using interval in queries.
-  
-If there are any of the above mistakes, rewrite the query. If there are no mistakes, just reproduce the original query.`;
+/**
+ * Trino SQL rules for peaka_execute_sql_query (DEV-4185). The earlier list was long, contradicted itself (GROUP BY
+ * by the full expression and by the column order) and gave wrong advice (avoid IN, use JOIN). This one is short and
+ * Trino-specific; the error loop does the rest: a failing query comes back with Trino's message, line and column.
+ */
+export const PEAKA_SQL_RULE_SET = `Peaka runs Trino SQL. Read-only: SELECT and WITH only.
+- Tables: catalog.schema.table as listed. Unquoted names are case-insensitive; double-quote a name only if it has capitals, spaces or other special characters.
+- Literals: strings in single quotes; DATE '2025-01-31', TIMESTAMP '2025-01-31 10:00:00', INTERVAL '30' DAY.
+- Integer division truncates (7 / 2 = 3): CAST to DOUBLE or DECIMAL for ratios and averages of integers.
+- Dates: date_trunc('month', ts), date_diff('day', a, b), date_add('day', 7, d). Compare timestamp columns with TIMESTAMP or DATE values, not strings; from_iso8601_timestamp only for varchar ISO strings.
+- NOT IN returns no rows when the list or subquery holds a NULL: use NOT EXISTS.
+- GROUP BY a select position (GROUP BY 1, 2) or the full expression, not a SELECT alias.
+- Exact counts with COUNT(DISTINCT x); approx_distinct is approximate.
+- JSON: json_extract_scalar(col, '$.field') returns varchar.
+- Aggregate in SQL (COUNT, SUM, GROUP BY) instead of reading rows and adding them up.
+- On an error, read Trino's message, line and column, fix that part and run again.`;
 
 export const PEAKA_ARTIFACT_TEMPLATE = `When generating an HTML artifact (report, dashboard, or visualization) from Peaka query results, follow these style and structure rules exactly:
 
@@ -496,5 +464,10 @@ To find the tables for a question, use two calls instead of listing catalogs, sc
 1. peaka_list_project_tables lists every table of the project, grouped by catalog.schema, in one line each: its name, [cached] when cached, a short description, some column names and joins.
 2. peaka_get_project_metadata with tables=["catalog.schema.table", ...] returns the chosen tables' columns, types, descriptions and relations in one call.
 Then run SQL with peaka_execute_sql_query. If the project is too large to list, the first call returns its schemas: list one schema, or use peaka_search_relevant_tables.
+
+Answering:
+- Say what the numbers cover: tables, filters, time window. When a result is cut (truncated) or a SaaS table was read live, say it may be incomplete.
+- An unknown is not zero: when the data cannot answer (a missing table, no field to match on, a partial read), say it cannot be determined; never give 0 or "none" for it.
+- State units and assumptions (currency, cents or units, time zone); when the data has no unit, say so.
 
 A table of a SaaS source that is not marked [cached] is read live, and a live read may return only its first page of records: say so instead of presenting it as the whole table. A database table (e.g. Oracle) is read live and in full; caching it does not help. The list gives this in each schema's header. Do not create caches to work around a failing or slow query, and create one only when the user asks for it or agrees.`;
