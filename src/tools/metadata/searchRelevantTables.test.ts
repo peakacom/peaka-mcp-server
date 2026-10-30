@@ -44,6 +44,19 @@ describe("relevant table MCP tool", () => {
     expect(body.tables).toEqual([["stripe.payment.event_invoices", "1", "List events, going back up to 30 days.", 45,
       `${columns.slice(0, 40).map(c => c.name).join(", ")}, … (+5)`]]);
   });
+  it("passes the service's one-line candidates on as they are (DEV-4188)", async () => {
+    const tool = definition();
+    mocks.search.mockResolvedValue({
+      status: "ready", index: "up_to_date", coverage: "unknown", legend: "One line per candidate.", nextAction: "Read their columns.",
+      tables: [{ catalogId: "1", schemaName: "payment", tableName: "charges", table: "stripe.payment.charges",
+                 line: "stripe.payment.charges [cached]: Charges. | columns: id, amount", foundBy: "name" }],
+    });
+    const response = await tool.execute(tool.parameters.parse({ projectId: "p", question: "charges" }), { session: {}, log: {} });
+    expect(JSON.parse(response.content[0].text)).toEqual({
+      status: "ready", index: "up_to_date", legend: "One line per candidate.",
+      candidates: ["stripe.payment.charges [cached]: Charges. | columns: id, amount"], nextAction: "Read their columns.",
+    });
+  });
   it.each([{ question: " " }, { question: "x".repeat(2001) }, { limit: 0 }, { limit: 11 }, { limit: 1.5 }])
     ("rejects unbounded/invalid input", invalid => {
       expect(() => definition().parameters.parse({ projectId: "p", question: "patients", ...invalid })).toThrow();

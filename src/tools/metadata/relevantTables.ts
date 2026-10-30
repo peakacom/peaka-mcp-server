@@ -9,9 +9,13 @@ interface RelevantTable {
   description?: string | null;
   columns?: { name: string }[];
   foundBy?: string;
+  /** The candidate's line, when the service writes one. */
+  line?: string;
 }
 
 interface RelevantTablesBody {
+  /** Set when the service writes each candidate as one line (DEV-4188). */
+  legend?: string;
   status?: string;
   reason?: string | null;
   index?: string;
@@ -38,6 +42,19 @@ const firstSentence = (text: string | null | undefined): string => {
  */
 export const compactRelevantTables = (body: RelevantTablesBody) => {
   const tables = body.tables ?? [];
+  // The service writes each candidate as one line already: pass the lines on, best first.
+  if (tables.length && tables.every((t) => typeof t.line === "string")) {
+    return {
+      status: body.status,
+      index: body.index,
+      ...(body.index && body.index !== "up_to_date"
+        ? { note: `The AI index is ${body.index}: candidates were found by their names and by text, not by meaning. Check them, or list the catalog's schemas and tables.` }
+        : {}),
+      legend: body.legend,
+      candidates: tables.map((t) => t.line as string),
+      nextAction: body.nextAction,
+    };
+  }
   return {
     status: body.status,
     index: body.index,
