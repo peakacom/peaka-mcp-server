@@ -33,7 +33,7 @@ export const registerMaterializedQueryStatusTool: ToolRegister = (server) => {
           ? await svc.getMaterializedQueryStatus(args.projectId, args.queryId)
           : await svc.getMaterializedQueryStatuses(args.projectId);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_get_materialized_query_statuses" });

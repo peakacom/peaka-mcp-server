@@ -3,6 +3,7 @@ import { resolveService } from "../../context";
 import { PROJECT_ID_HINT } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
+import { compactQueryResult } from "./queryResult";
 
 export const registerExecuteQueryTool: ToolRegister = (server) => {
   server.addTool({
@@ -26,7 +27,7 @@ export const registerExecuteQueryTool: ToolRegister = (server) => {
         const svc = resolveService(session);
         const result = await svc.executeQuery(args.projectId, args.queryId);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(compactQueryResult(result)) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_execute_query" });

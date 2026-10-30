@@ -41,7 +41,7 @@ export const registerUpdateCacheTool: ToolRegister = (server) => {
           fullRefreshCacheSchedule: args.fullRefreshSchedule,
         });
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_update_cache" });

@@ -52,7 +52,7 @@ export const registerUpdateQueryTool: ToolRegister = (server) => {
         const svc = resolveService(session);
         const result = await svc.updateQuery(args.projectId, args.queryId, body);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_update_query" });

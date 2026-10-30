@@ -28,7 +28,7 @@ export const registerQueryGoldenSqlsTool: ToolRegister = (server) => {
         const svc = resolveService(session);
         const result = await svc.queryForGoldenSqls(args.projectId, args.query);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_query_golden_sqls" });

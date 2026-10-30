@@ -3,6 +3,7 @@ import { resolveService } from "../../context";
 import { PROJECT_ID_HINT } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
+import { compactQueryResult } from "./queryResult";
 
 export const registerExecuteSqlQueryTool: ToolRegister = (server) => {
   server.addTool({
@@ -56,7 +57,7 @@ export const registerExecuteSqlQueryTool: ToolRegister = (server) => {
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(compactQueryResult(result)) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_execute_sql_query" });

@@ -31,7 +31,7 @@ export const registerListTablesTool: ToolRegister = (server) => {
           args.schemaName
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_list_tables" });

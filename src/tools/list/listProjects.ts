@@ -40,7 +40,7 @@ export const registerListProjectsTool: ToolRegister = (server) => {
 
         return {
           content: [
-            { type: "text", text: JSON.stringify({ projects }, null, 2) },
+            { type: "text", text: JSON.stringify({ projects }) },
           ],
         };
       } catch (error) {

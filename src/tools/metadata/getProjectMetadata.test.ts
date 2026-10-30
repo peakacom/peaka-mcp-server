@@ -49,7 +49,7 @@ describe("peaka_get_project_metadata format", () => {
     const result = await call({ catalogId: "1" });
     const body = JSON.parse(result.content[0].text);
     expect(body.metadata[0].metadata.columns).toEqual([{ columnName: "a", columnDescription: "", isSystem: false }]);
-    expect(result.content[0].text).toContain("\n  ");
+    expect(result.content[0].text).not.toContain("\n");
     expect(requests.at(-1)).toBe("/metadata/p?catalogId=1");
   });
 

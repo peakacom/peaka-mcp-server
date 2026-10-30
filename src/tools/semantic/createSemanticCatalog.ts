@@ -29,7 +29,7 @@ export const registerCreateSemanticCatalogTool: ToolRegister = (server) => {
           name: args.name,
         });
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_create_semantic_catalog" });

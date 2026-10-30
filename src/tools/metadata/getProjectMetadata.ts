@@ -63,7 +63,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
           content: [
             {
               type: "text",
-              text: JSON.stringify(filterMetadataResponse(result), null, 2),
+              text: JSON.stringify(filterMetadataResponse(result)),
             },
           ],
         };
