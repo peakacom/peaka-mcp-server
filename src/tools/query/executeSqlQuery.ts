@@ -12,8 +12,8 @@ export const registerExecuteSqlQueryTool: ToolRegister = (server) => {
       `Runs the given sql query on Peaka.
 
     BEFORE RUNNING THIS TOOL:
-      1: Use peaka_search_relevant_tables to find candidate tables, then fetch only the needed metadata scope or columns. If search is unavailable or unhelpful, use catalog/schema/table discovery.
-      2: Use peaka_list_tables to determine if the tables of interest are cached or not (its cache column; pass tableNameContains to look up specific tables)
+      1: Find the tables with peaka_list_project_tables (one line a table, with its cache state), then read the chosen tables' columns with peaka_get_project_metadata and tables=[...] in one call. If the project is too large to list, list one schema or use peaka_search_relevant_tables.
+      2: Check the tables' cache state in that list ([cached], [not cached], or no tag for sources always read live); peaka_list_tables gives it per schema too
       3: If one or more tables that you need to query are cacheable but not cached:
         3a: Warn the user that the results will be limited and, if caching tools are available in this session, offer to start caching those tables before querying
         3b: If the caching is rejected by the user, warn them that the query results will be limited and use LIMIT statements on the query to make sure it doesn't run forever

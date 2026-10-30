@@ -38,6 +38,7 @@ import {
   QueryResult,
   TableMetadataResult,
   RelevantTablesResponse,
+  ProjectTableList,
 } from "./types";
 import {
   CREATE_CACHE_URL_TEMPLATE,
@@ -193,25 +194,45 @@ export class APIService {
   public async getProjectMetadataAs(
     projectId: string,
     format: MetadataFormat,
-    options: { catalogId?: string; schemaName?: string; includeSamples?: boolean } = {}
+    options: { catalogId?: string; schemaName?: string; includeSamples?: boolean; tables?: string[] } = {}
   ): Promise<string> {
     const url = GET_PROJECT_METADATA_URL_TEMPLATE({
       projectId,
     });
 
-    const params: Record<string, string> = { format };
+    // One table= a table (a table name may hold a comma); axios would write table[]= for an array.
+    const params = new URLSearchParams({ format });
     if (options.catalogId) {
-      params.catalogId = options.catalogId;
+      params.set("catalogId", options.catalogId);
     }
     if (options.schemaName) {
-      params.schemaName = options.schemaName;
+      params.set("schemaName", options.schemaName);
     }
     if (options.includeSamples) {
-      params.include = "samples";
+      params.set("include", "samples");
+    }
+    for (const table of options.tables ?? []) {
+      params.append("table", table);
     }
 
     const response = await this.axiosInstance.get<unknown>(url, { params });
     return typeof response.data === "string" ? response.data : JSON.stringify(response.data);
+  }
+
+  /**
+   * The project's tables, one short line each (name, description, column names, joins, cache state), or, when the
+   * scope is too large to list whole, its schemas with their table counts.
+   */
+  public async listProjectTables(
+    projectId: string,
+    options: { catalogId?: string; schemaName?: string } = {}
+  ): Promise<ProjectTableList> {
+    const params: Record<string, string> = {};
+    if (options.catalogId) params.catalogId = options.catalogId;
+    if (options.schemaName) params.schemaName = options.schemaName;
+    const response = await this.axiosInstance.get<ProjectTableList>(
+      `metadata/${encodeURIComponent(projectId)}/table-list`, { params });
+    return response.data;
   }
 
   public async listCatalogs(projectId: string): Promise<Catalog[]> {

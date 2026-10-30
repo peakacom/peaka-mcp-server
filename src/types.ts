@@ -52,6 +52,18 @@ export interface RelevantTablesResponse {
   nextAction: string;
 }
 
+export type ProjectTableList =
+  | { status: "listed"; scope: { catalogId?: string; schemaName?: string }; tables: number; tokens: number; legend: string; list: string }
+  | {
+      status: "too_large";
+      reason: "too_many_tables" | "over_token_budget";
+      scope: { catalogId?: string; schemaName?: string };
+      tables: number;
+      tokens?: number;
+      schemas: { catalog: string; catalogId: string; schema: string; tables: number }[];
+      nextAction: string;
+    };
+
 export interface ProjectMetadataEntry {
   id: string;
   content: string;

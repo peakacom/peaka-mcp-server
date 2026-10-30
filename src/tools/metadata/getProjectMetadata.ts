@@ -10,7 +10,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_get_project_metadata",
     description:
-      `Get project metadata, preferably scoped by catalogId and/or schemaName. For metadata management, prefer peaka_list_table_metadata for one bounded page. For a data question, start with peaka_search_relevant_tables and fetch the scope you need. An unfiltered call can return a large response. If metadata is missing, use peaka_list_schemas, peaka_list_tables and peaka_list_columns; missing metadata does not mean no data.
+      `Get project metadata. For a data question: choose the tables from peaka_list_project_tables, then pass them here as tables=["catalog.schema.table", ...] (up to 20) to get their columns, types, descriptions, keys and relations in one call; format defaults to "compact" then. Otherwise scope by catalogId and/or schemaName; an unscoped call can return a large response. For metadata management, prefer peaka_list_table_metadata for one bounded page. If metadata is missing, use peaka_list_schemas, peaka_list_tables and peaka_list_columns; missing metadata does not mean no data.
 
     format makes the result much smaller: "compact" returns { tables: [{ table, desc, columns: [{ name, type, desc, pk, values }], relations }] } with the table names as written in SQL; "ddl" returns CREATE TABLE statements with descriptions as comments. Without format the full stored metadata is returned. includeSamples (with a format) adds distinct sample values to each column.
 
@@ -31,6 +31,11 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
         .string()
         .optional()
         .describe("Optional schema name to filter metadata by a specific schema."),
+      tables: z
+        .array(z.string().min(1))
+        .max(20)
+        .optional()
+        .describe('Tables as catalog.schema.table, as peaka_list_project_tables writes them. Not with catalogId/schemaName.'),
       format: z
         .enum(METADATA_FORMATS)
         .optional()
@@ -43,14 +48,21 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
     execute: async (args, { log, session }) => {
       try {
         const svc = resolveService(session);
-        if (args.includeSamples && !args.format) {
+        const tables = args.tables?.length ? args.tables : undefined;
+        if (tables && (args.catalogId || args.schemaName)) {
+          throw new UserError("Pass tables or a catalogId/schemaName scope, not both.");
+        }
+        // Named tables are for reading before a query: compact unless asked otherwise.
+        const format = args.format ?? (tables ? "compact" : undefined);
+        if (args.includeSamples && !format) {
           throw new UserError('includeSamples needs format "compact" or "ddl".');
         }
-        if (args.format) {
-          const text = await svc.getProjectMetadataAs(args.projectId, args.format, {
+        if (format) {
+          const text = await svc.getProjectMetadataAs(args.projectId, format, {
             catalogId: args.catalogId,
             schemaName: args.schemaName,
             includeSamples: args.includeSamples,
+            tables,
           });
           return { content: [{ type: "text", text }] };
         }

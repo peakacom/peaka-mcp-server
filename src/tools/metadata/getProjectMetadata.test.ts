@@ -66,4 +66,14 @@ describe("peaka_get_project_metadata format", () => {
   it("refuses samples without a format", async () => {
     await expect(call({ includeSamples: true })).rejects.toThrow(/needs format/);
   });
+
+  it("reads named tables compact by default, one table parameter each", async () => {
+    const result = await call({ tables: ["stripe.payment.charges", "bank.core.my table,x"] });
+    expect(JSON.parse(result.content[0].text)).toEqual({ tables: [{ table: "c.s.t", columns: [{ name: "a", type: "bigint" }] }] });
+    expect(requests.at(-1)).toBe("/metadata/p?format=compact&table=stripe.payment.charges&table=bank.core.my+table%2Cx");
+  });
+
+  it("refuses named tables together with a scope", async () => {
+    await expect(call({ tables: ["a.b.c"], catalogId: "1" })).rejects.toThrow(/not both/);
+  });
 });
