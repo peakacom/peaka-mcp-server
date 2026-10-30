@@ -21,7 +21,7 @@ export const projectTableListText = (result: ProjectTableList): string =>
 export const registerListProjectTablesTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_list_project_tables",
-    description: `Start here to find the tables for a data question. Lists every table of the project (or of one catalog or schema) in one line each: catalog.schema.table, its cache state, the first sentence of its description, up to 12 column names and the tables it joins. Choose the tables the question needs from this list, then read their columns with peaka_get_project_metadata and tables=[...] in one call.
+    description: `Start here to find the tables for a data question. Lists every table of the project (or of one catalog or schema), grouped by catalog.schema, one line each: its name, [cached] when it is cached, the start of its description, up to 6 column names and the tables it joins. Each schema's header gives its catalogId and how its tables are read (a SaaS source live, first page only, unless [cached]; a database live and in full). Write tables as catalog.schema.table. Choose the tables the question needs from this list, then read their columns with peaka_get_project_metadata and tables=[...] in one call.
 
 If the project is too large to list whole, the answer gives its schemas with their table counts: list one schema with catalogId and schemaName, or use peaka_search_relevant_tables.
 

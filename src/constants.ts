@@ -493,8 +493,8 @@ For Chart.js, set these as \`backgroundColor\` (with alpha \`33\` for fills) and
 export const PEAKA_SERVER_INSTRUCTIONS = `Peaka answers data questions with SQL over a project's catalogs.
 
 To find the tables for a question, use two calls instead of listing catalogs, schemas, tables and columns one by one:
-1. peaka_list_project_tables lists every table of the project in one line each: catalog.schema.table, its cache state, a short description, column names and joins.
+1. peaka_list_project_tables lists every table of the project, grouped by catalog.schema, in one line each: its name, [cached] when cached, a short description, some column names and joins.
 2. peaka_get_project_metadata with tables=["catalog.schema.table", ...] returns the chosen tables' columns, types, descriptions and relations in one call.
 Then run SQL with peaka_execute_sql_query. If the project is too large to list, the first call returns its schemas: list one schema, or use peaka_search_relevant_tables.
 
-A table marked [not cached] is read live from its SaaS source, and a live read may return only its first page of records: say so instead of presenting it as the whole table. A table with no cache tag (e.g. a database such as Oracle) is read live and in full; caching it does not help. Do not create caches to work around a failing or slow query, and create one only when the user asks for it or agrees.`;
+A table of a SaaS source that is not marked [cached] is read live, and a live read may return only its first page of records: say so instead of presenting it as the whole table. A database table (e.g. Oracle) is read live and in full; caching it does not help. The list gives this in each schema's header. Do not create caches to work around a failing or slow query, and create one only when the user asks for it or agrees.`;

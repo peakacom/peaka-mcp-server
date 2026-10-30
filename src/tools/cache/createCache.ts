@@ -9,7 +9,7 @@ export const registerCreateCacheTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_create_cache",
     description:
-      `Create a cache for a table in the Peaka project, so its records are read from Peaka instead of the source. Only for tables listed as cacheable ([not cached] in peaka_list_project_tables or peaka_list_tables): SaaS sources whose live read may return only the first page of records. A database table (no cache tag, e.g. Oracle) is read live and in full and is not cached. Create a cache only when the user asks for it or agrees to it, never to work around a failing or slow query; the first sync takes time, and until it completes the cache is not complete. Schedule expressions are optional at creation time and use ISO-8601 durations (e.g. PT6H, P1D, P7D, P30D); they can be set later with peaka_update_cache.
+      `Create a cache for a table in the Peaka project, so its records are read from Peaka instead of the source. Only for tables of a SaaS source that are not cached yet (peaka_list_project_tables: a SaaS schema's table without [cached]; peaka_list_tables: not_cached): a live read of them may return only the first page of records. A database table (e.g. Oracle) is read live and in full and is not cached. Create a cache only when the user asks for it or agrees to it, never to work around a failing or slow query; the first sync takes time, and until it completes the cache is not complete. Schedule expressions are optional at creation time and use ISO-8601 durations (e.g. PT6H, P1D, P7D, P30D); they can be set later with peaka_update_cache.
 
     ${PROJECT_ID_HINT}`,
     annotations: {
