@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, filterMetadataResponse } from "../shared";
+import { PROJECT_ID_HINT, filterMetadataResponse, CATALOG_REF } from "../shared";
 import type { ToolRegister } from "../types";
 import { UserError } from "fastmcp";
 import { handleToolError } from "../../error";
@@ -26,7 +26,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
       catalogId: z
         .string()
         .optional()
-        .describe("Optional catalog ID to filter metadata by a specific catalog."),
+        .describe(`Optional: only this catalog's metadata. ${CATALOG_REF}`),
       schemaName: z
         .string()
         .optional()

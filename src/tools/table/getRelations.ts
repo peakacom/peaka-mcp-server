@@ -2,7 +2,7 @@ import { UserError } from "fastmcp";
 import { z } from "zod";
 import axios from "axios";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, CATALOG_REF } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
 
@@ -23,7 +23,7 @@ export const registerGetRelationsTool: ToolRegister = (server) => {
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z
         .string()
-        .describe("The catalog ID whose relationships should be returned."),
+        .describe(`Whose relationships to return. ${CATALOG_REF}`),
     }),
     execute: async (args, { log, session }) => {
       try {

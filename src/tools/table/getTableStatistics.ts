@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, CATALOG_REF } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
 
@@ -19,7 +19,7 @@ export const registerGetTableStatisticsTool: ToolRegister = (server) => {
     },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
-      catalogId: z.string(),
+      catalogId: z.string().describe(CATALOG_REF),
       schemaName: z.string(),
       tableName: z.string(),
     }),

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, CATALOG_REF } from "../shared";
 import { handleToolError } from "../../error";
 import type { ToolRegister } from "../types";
 import type { ProjectTableList } from "../../types";
@@ -29,7 +29,7 @@ ${PROJECT_ID_HINT}`,
     annotations: { title: "List Project Tables", readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     parameters: z.object({
       projectId: z.string().min(1).describe("The Peaka project ID."),
-      catalogId: z.string().optional().describe("Only this catalog's tables."),
+      catalogId: z.string().optional().describe(`Only this catalog's tables. ${CATALOG_REF}`),
       schemaName: z.string().optional().describe("Only this schema's tables (needs catalogId)."),
     }),
     execute: async (args, { log, session }) => {
