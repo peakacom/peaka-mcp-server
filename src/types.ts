@@ -72,6 +72,9 @@ export interface ProjectMetadataEntry {
 
 export const METADATA_FORMATS = ["compact", "ddl"] as const;
 export type MetadataFormat = (typeof METADATA_FORMATS)[number];
+/** The parts of a compact or ddl answer, always given in this order. */
+export const METADATA_LEVELS = ["catalogs", "schemas", "tables"] as const;
+export type MetadataLevel = (typeof METADATA_LEVELS)[number];
 
 export interface ProjectMetadataResponse {
   metadata: ProjectMetadataEntry[];

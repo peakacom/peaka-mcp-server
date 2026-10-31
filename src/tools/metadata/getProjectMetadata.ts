@@ -4,7 +4,7 @@ import { PROJECT_ID_HINT, filterMetadataResponse } from "../shared";
 import type { ToolRegister } from "../types";
 import { UserError } from "fastmcp";
 import { handleToolError } from "../../error";
-import { METADATA_FORMATS } from "../../types";
+import { METADATA_FORMATS, METADATA_LEVELS } from "../../types";
 
 export const registerGetProjectMetadataTool: ToolRegister = (server) => {
   server.addTool({
@@ -12,7 +12,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
     description:
       `Get project metadata. For a data question: choose the tables from peaka_list_project_tables, then pass them here as tables=["catalog.schema.table", ...] (up to 20) to get their columns, types, descriptions, keys and relations in one call; format defaults to "compact" then. Otherwise scope by catalogId and/or schemaName; an unscoped call can return a large response. For metadata management, prefer peaka_list_table_metadata for one bounded page. If metadata is missing, use peaka_list_schemas, peaka_list_tables and peaka_list_columns; missing metadata does not mean no data.
 
-    format makes the result much smaller: "compact" returns { tables: [{ table, desc, columns: [{ name, type, desc, pk, values }], relations }] } with the table names as written in SQL; "ddl" returns CREATE TABLE statements with descriptions as comments. Without format the full stored metadata is returned. includeSamples (with a format) adds distinct sample values to each column.
+    format makes the result much smaller: "compact" returns { catalogs: [{ catalog, catalogId, desc }], schemas: [{ schema, desc }], tables: [{ table, desc, columns: [{ name, type, desc, pk, values }], relations }] }: the catalogs and schemas of the tables in scope with what each holds, then the tables, with names as written in SQL; "ddl" returns the catalogs and schemas as comment lines, then CREATE TABLE statements with descriptions as comments. levels picks the parts (any of catalogs, schemas, tables; all three by default): levels=["catalogs","schemas"] tells what the project's sources hold without their tables. Without format the full stored metadata is returned. includeSamples (with a format) adds distinct sample values to each column.
 
     ${PROJECT_ID_HINT}`,
     annotations: {
@@ -44,6 +44,11 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
         .boolean()
         .optional()
         .describe("With format: add distinct sample values of each column."),
+      levels: z
+        .array(z.enum(METADATA_LEVELS))
+        .min(1)
+        .optional()
+        .describe('Parts of a compact or ddl answer: any of "catalogs", "schemas", "tables" (default all three). Implies format "compact" when no format is given.'),
     }),
     execute: async (args, { log, session }) => {
       try {
@@ -53,7 +58,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
           throw new UserError("Pass tables or a catalogId/schemaName scope, not both.");
         }
         // Named tables are for reading before a query: compact unless asked otherwise.
-        const format = args.format ?? (tables ? "compact" : undefined);
+        const format = args.format ?? (tables || args.levels?.length ? "compact" : undefined);
         if (args.includeSamples && !format) {
           throw new UserError('includeSamples needs format "compact" or "ddl".');
         }
@@ -63,6 +68,7 @@ export const registerGetProjectMetadataTool: ToolRegister = (server) => {
             schemaName: args.schemaName,
             includeSamples: args.includeSamples,
             tables,
+            levels: args.levels,
           });
           return { content: [{ type: "text", text }] };
         }

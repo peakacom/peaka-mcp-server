@@ -53,6 +53,13 @@ describe("peaka_get_project_metadata format", () => {
     expect(requests.at(-1)).toBe("/metadata/p?catalogId=1");
   });
 
+  it("levels reach the API as one list and imply compact", async () => {
+    await call({ levels: ["catalogs", "schemas"] });
+    expect(requests.at(-1)).toBe("/metadata/p?format=compact&levels=catalogs%2Cschemas");
+    await call({ format: "ddl", catalogId: "1", levels: ["schemas"] });
+    expect(requests.at(-1)).toBe("/metadata/p?format=ddl&catalogId=1&levels=schemas");
+  });
+
   it("compact and ddl come back as the API wrote them, samples only when asked", async () => {
     const compact = await call({ format: "compact" });
     expect(compact.content[0].text).toBe('{"tables":[{"table":"c.s.t","columns":[{"name":"a","type":"bigint"}]}]}');

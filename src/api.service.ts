@@ -40,6 +40,7 @@ import {
   RelevantTablesResponse,
   ProjectTableList,
   ScopeDescriptions,
+  MetadataLevel,
 } from "./types";
 import {
   CREATE_CACHE_URL_TEMPLATE,
@@ -195,7 +196,7 @@ export class APIService {
   public async getProjectMetadataAs(
     projectId: string,
     format: MetadataFormat,
-    options: { catalogId?: string; schemaName?: string; includeSamples?: boolean; tables?: string[] } = {}
+    options: { catalogId?: string; schemaName?: string; includeSamples?: boolean; tables?: string[]; levels?: MetadataLevel[] } = {}
   ): Promise<string> {
     const url = GET_PROJECT_METADATA_URL_TEMPLATE({
       projectId,
@@ -211,6 +212,9 @@ export class APIService {
     }
     if (options.includeSamples) {
       params.set("include", "samples");
+    }
+    if (options.levels?.length) {
+      params.set("levels", options.levels.join(","));
     }
     for (const table of options.tables ?? []) {
       params.append("table", table);
