@@ -266,10 +266,11 @@ export class APIService {
       this.axiosInstance.get<Schema[]>(url),
       this.scopeDescriptions(projectId, catalogId),
     ]);
-    const byName = new Map(
-      (described.find((c) => c.catalogId === catalogId)?.schemas ?? []).map((s) => [s.schemaName, s.description])
+    // By the catalog each schema came back with: catalogId may be a name, and peaka is two catalogs (Codex review).
+    const byScope = new Map(
+      described.flatMap((c) => c.schemas.map((s) => [`${c.catalogId}|${s.schemaName}`, s.description] as [string, string]))
     );
-    return response.data.map((s) => withDescription(s, byName.get(s.schemaName)));
+    return response.data.map((s) => withDescription(s, byScope.get(`${s.catalogId}|${s.schemaName}`)));
   }
 
   /**

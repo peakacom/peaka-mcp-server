@@ -75,6 +75,25 @@ describe("APIService catalog and schema listings", () => {
     expect(calls.find((c) => c.url.includes("/descriptions"))?.params).toEqual({ catalogId: "10" });
   });
 
+  it("matches schema descriptions by the catalog each schema came back with, when the catalog was named (Codex review)", async () => {
+    const schemas = [
+      { catalogId: "1", catalogName: "peaka", schemaName: "table" },
+      { catalogId: "2", catalogName: "peaka", schemaName: "query" },
+    ];
+    const peaka = {
+      available: true,
+      catalogs: [
+        { catalogId: "1", description: "", schemas: [{ schemaName: "table", description: "Peaka tables." }] },
+        { catalogId: "2", description: "", schemas: [{ schemaName: "query", description: "Saved queries." }] },
+      ],
+    };
+    const { svc } = withGets({ "/descriptions": peaka, schemas });
+    expect(await svc.listSchemas("P", "peaka")).toEqual([
+      { ...schemas[0], description: "Peaka tables." },
+      { ...schemas[1], description: "Saved queries." },
+    ]);
+  });
+
   it("lists catalogs as before when descriptions cannot be read", async () => {
     const { svc } = withGets({ "/descriptions": new Error("404"), catalogs });
     expect(await svc.listCatalogs("P")).toEqual(catalogs);
