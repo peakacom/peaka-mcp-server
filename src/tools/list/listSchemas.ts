@@ -8,7 +8,7 @@ export const registerListSchemasTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_list_schemas",
     description:
-      `List all available schemas for a given catalog in the Peaka project.
+      `List all available schemas for a given catalog in the Peaka project, with a schema's description (what it holds) when one is written.
 
     ${PROJECT_ID_HINT}`,
     annotations: {

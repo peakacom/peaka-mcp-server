@@ -8,7 +8,7 @@ export const registerListCatalogsTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_list_catalogs",
     description:
-      `List all available catalogs in the Peaka project. Returns catalog names, types, and connection info.
+      `List all available catalogs in the Peaka project. Returns catalog names, types, and connection info, and a catalog's description (what it holds) when one is written.
 
     ${PROJECT_ID_HINT}`,
     annotations: {

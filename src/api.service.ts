@@ -39,6 +39,7 @@ import {
   TableMetadataResult,
   RelevantTablesResponse,
   ProjectTableList,
+  ScopeDescriptions,
 } from "./types";
 import {
   CREATE_CACHE_URL_TEMPLATE,
@@ -240,8 +241,12 @@ export class APIService {
       projectId,
     });
 
-    const response = await this.axiosInstance.get<Catalog[]>(url);
-    return response.data;
+    const [response, described] = await Promise.all([
+      this.axiosInstance.get<Catalog[]>(url),
+      this.scopeDescriptions(projectId),
+    ]);
+    const byId = new Map(described.map((c) => [c.catalogId, c.description]));
+    return response.data.map((c) => withDescription(c, byId.get(String(c.id))));
   }
 
   public async listSchemas(
@@ -253,8 +258,30 @@ export class APIService {
       catalogId,
     });
 
-    const response = await this.axiosInstance.get<Schema[]>(url);
-    return response.data;
+    const [response, described] = await Promise.all([
+      this.axiosInstance.get<Schema[]>(url),
+      this.scopeDescriptions(projectId, catalogId),
+    ]);
+    const byName = new Map(
+      (described.find((c) => c.catalogId === catalogId)?.schemas ?? []).map((s) => [s.schemaName, s.description])
+    );
+    return response.data.map((s) => withDescription(s, byName.get(s.schemaName)));
+  }
+
+  /**
+   * The catalog and schema descriptions written in Peaka. A listing does not depend on them: a deployment without
+   * them, or a failed read, lists catalogs and schemas as before.
+   */
+  private async scopeDescriptions(projectId: string, catalogId?: string): Promise<ScopeDescriptions["catalogs"]> {
+    try {
+      const response = await this.axiosInstance.get<ScopeDescriptions>(
+        `metadata/${encodeURIComponent(projectId)}/descriptions`,
+        { params: catalogId ? { catalogId } : {} }
+      );
+      return response.data?.available ? response.data.catalogs ?? [] : [];
+    } catch {
+      return [];
+    }
   }
 
   public async listTables(
@@ -654,3 +681,7 @@ export class APIService {
     return response.data;
   }
 }
+
+/** Adds a description only when one is written, so an undescribed catalog or schema costs no tokens. */
+const withDescription = <T extends object>(item: T, description: string | undefined): T =>
+  description ? { ...item, description } : item;

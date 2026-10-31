@@ -139,12 +139,26 @@ export interface Catalog {
   displayName: string;
   catalogType: string;
   connectionId: string | null;
+  /** What the catalog holds, written in Peaka; absent when none is written. */
+  description?: string;
 }
 
 export interface Schema {
   catalogId: string;
   catalogName: string;
   schemaName: string;
+  /** What the schema holds, written in Peaka; absent when none is written. */
+  description?: string;
+}
+
+/** GET metadata/:projectId/descriptions: catalog and schema descriptions, a shared catalog's from its owner. */
+export interface ScopeDescriptions {
+  available: boolean;
+  catalogs: {
+    catalogId: string;
+    description: string;
+    schemas: { schemaName: string; description: string }[];
+  }[];
 }
 
 export interface Table {
