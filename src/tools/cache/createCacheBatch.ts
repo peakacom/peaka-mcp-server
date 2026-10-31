@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, cacheScheduleSchema, requireWrite } from "../shared";
+import { CATALOG_REF, PROJECT_ID_HINT, cacheScheduleSchema, requireWrite } from "../shared";
 import type { ToolRegister } from "../types";
 import type { CreateCacheRequest } from "../../types";
 import { handleToolError } from "../../error";
@@ -24,7 +24,7 @@ export const registerCreateCacheBatchTool: ToolRegister = (server) => {
       items: z
         .array(
           z.object({
-            catalogId: z.string(),
+            catalogId: z.string().describe(CATALOG_REF),
             schemaName: z.string(),
             tableName: z.string(),
             incrementalSchedule: cacheScheduleSchema().optional().describe(
