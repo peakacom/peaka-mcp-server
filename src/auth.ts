@@ -173,6 +173,12 @@ function firstHeader(value: string | string[] | undefined): string | undefined {
 /**
  * Builds the OAuth protected-resource metadata URL on the MCP server's own
  * origin, derived from the (proxy-)forwarded request host.
+ *
+ * A request that arrived on the project-preselected form (/p/{projectId}/mcp,
+ * rewritten by the front proxy, which states the original path in its own
+ * header — client-sent values never survive it) gets the RFC 9728
+ * path-inserted metadata URL, so discovery hands the client the per-project
+ * resource and the consent screen preselects that project (DEV-4244).
  */
 export function resourceMetadataUrl(headers: IncomingHttpHeaders): string {
   const proto = firstHeader(headers["x-forwarded-proto"]);
@@ -180,8 +186,13 @@ export function resourceMetadataUrl(headers: IncomingHttpHeaders): string {
   if (!host) {
     throw new Error("Cannot determine request host for OAuth metadata");
   }
+  const forwardedPath = firstHeader(headers["x-peaka-forwarded-path"]);
+  const projectPath =
+    forwardedPath && /^\/p\/[A-Za-z0-9_-]+\/mcp$/.test(forwardedPath)
+      ? forwardedPath
+      : "";
   return new URL(
-    "/.well-known/oauth-protected-resource",
+    `/.well-known/oauth-protected-resource${projectPath}`,
     `${proto ?? "https"}://${host}`,
   ).toString();
 }

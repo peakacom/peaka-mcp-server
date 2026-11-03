@@ -7,6 +7,7 @@ import type { PeakaSession } from "./types";
 import { getMode } from "./context";
 import { budgetedServer } from "./tools/budget";
 import { loadAuthConfig, createAuthenticator } from "./auth";
+import { startFrontProxy } from "./projectPath";
 import {
   registerQueryTools,
   registerMetadataTools,
@@ -82,15 +83,24 @@ const onStartError = (error: unknown) => {
 };
 
 if (mode === "httpStream") {
+  // fastmcp matches its stream endpoint path exactly, so it listens on the
+  // loopback and the front proxy owns the public port: it rewrites the
+  // project-preselected form /p/{projectId}/mcp to /mcp (DEV-4244) and passes
+  // everything else through.
+  const publicPort = process.env.PORT ? Number(process.env.PORT) : DEFAULT_PORT;
+  const internalPort = publicPort + 1;
   server
     .start({
       transportType: "httpStream",
       httpStream: {
-        port: process.env.PORT ? Number(process.env.PORT) : DEFAULT_PORT,
+        port: internalPort,
         stateless: true,
-        host: "0.0.0.0",
+        host: "127.0.0.1",
       },
     })
+    .then(() =>
+      startFrontProxy({ publicPort, publicHost: "0.0.0.0", internalPort }),
+    )
     .catch(onStartError);
 } else {
   server.start({ transportType: "stdio" }).catch(onStartError);
