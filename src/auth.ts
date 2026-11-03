@@ -104,11 +104,14 @@ export function loadAuthConfig(env: NodeJS.ProcessEnv = process.env): AuthConfig
   return {
     issuer,
     jwksUri,
-    // The legacy coarse scope or the fine-grained catalog's universal base
-    // (DEV-4237: every project-restricted token carries project:read).
-    requiredScopes: (env.OAUTH_REQUIRED_SCOPE || "user_access project:read")
-      .split(/[\s,]+/)
-      .filter(Boolean),
+    // OAUTH_REQUIRED_SCOPE picks the coarse scope(s); the fine-grained
+    // catalog's universal base is always accepted besides them, because every
+    // project-restricted token carries project:read and no deployment should
+    // have to learn that through an env change (DEV-4237).
+    requiredScopes: [
+      ...(env.OAUTH_REQUIRED_SCOPE || "user_access").split(/[\s,]+/).filter(Boolean),
+      "project:read",
+    ],
     audience: env.OAUTH_RESOURCE || undefined,
   };
 }
