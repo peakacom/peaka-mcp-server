@@ -79,7 +79,8 @@ export class TokenError extends Error {
 export interface AuthConfig {
   issuer: string;
   jwksUri: string;
-  requiredScope: string;
+  /** Any one of these satisfies the scope gate (a token for Peaka data access). */
+  requiredScopes: string[];
   /**
    * Expected audience (the MCP resource). Optional and OFF by default: the
    * Peaka OAuth server currently sets `aud` to the client_id rather than the
@@ -103,7 +104,11 @@ export function loadAuthConfig(env: NodeJS.ProcessEnv = process.env): AuthConfig
   return {
     issuer,
     jwksUri,
-    requiredScope: env.OAUTH_REQUIRED_SCOPE || "user_access",
+    // The legacy coarse scope or the fine-grained catalog's universal base
+    // (DEV-4237: every project-restricted token carries project:read).
+    requiredScopes: (env.OAUTH_REQUIRED_SCOPE || "user_access project:read")
+      .split(/[\s,]+/)
+      .filter(Boolean),
     audience: env.OAUTH_RESOURCE || undefined,
   };
 }
@@ -149,10 +154,10 @@ export async function verifyAccessToken(
   }
 
   const scopes = extractScopes(payload);
-  if (!scopes.includes(config.requiredScope)) {
+  if (!config.requiredScopes.some((scope) => scopes.includes(scope))) {
     throw new TokenError(
       "insufficient_scope",
-      `Token is missing required scope "${config.requiredScope}"`,
+      `Token is missing a required scope (any of: ${config.requiredScopes.join(", ")})`,
     );
   }
 
@@ -300,7 +305,7 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
         const presented = presentedIdentifiers(token);
         if (err.kind === "insufficient_scope") {
           console.warn(
-            `[auth] 403 insufficient_scope required="${logSafe(config.requiredScope)}" ` +
+            `[auth] 403 insufficient_scope required="${logSafe(config.requiredScopes.join(" "))}" ` +
               `presented_scope="${presented.scope}" host=${host}`,
           );
           throw buildChallenge({
@@ -308,7 +313,7 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
             error: "insufficient_scope",
             description: err.description,
             resourceMetadata,
-            scope: config.requiredScope,
+            scope: config.requiredScopes.join(" "),
           });
         }
         console.warn(
