@@ -182,6 +182,8 @@ export interface ColumnDetail {
   isNotNull: boolean;
   isUnique: boolean;
   desc?: string;
+  /** The column's classification (DEV-4274): its tags, how each got there, and for an inherited one where from. */
+  tags?: { label: string | null; origin: "MANUAL" | "EXTERNAL" | "SUGGESTED" | "INHERITED"; reason?: string | null }[];
 }
 
 export interface Cache {
