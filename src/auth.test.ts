@@ -22,7 +22,7 @@ const KID = "test-key-1";
 const config: AuthConfig = {
   issuer: ISSUER,
   jwksUri: "https://issuer.test/oauth2/jwks",
-  requiredScope: "user_access",
+  requiredScopes: ["user_access", "project:read"],
 };
 
 let privateKey: KeyLike; // signing key whose public half is in the JWKS
@@ -174,7 +174,7 @@ describe("createAuthenticator", () => {
     expect(err.status).toBe(403);
     const wwwAuth = err.headers.get("WWW-Authenticate") ?? "";
     expect(wwwAuth).toContain('error="insufficient_scope"');
-    expect(wwwAuth).toContain('scope="user_access"');
+    expect(wwwAuth).toContain('scope="user_access project:read"');
   });
 
   it("resolves to a session for a valid token", async () => {
@@ -245,5 +245,20 @@ describe("createAuthenticator", () => {
     expect(logged).toContain('presented_iss="https://real.test:443"');
     expect(logged).not.toContain(token); // token is never logged
     warn.mockRestore();
+  });
+});
+
+describe("fine-grained scope gate (DEV-4237)", () => {
+  it("accepts a token carrying only catalog scopes", async () => {
+    const token = await sign({ scope: ["project:read", "query:execute"] });
+    const session = await verifyAccessToken(token, config, keySet);
+    expect(session.scopes).toContain("project:read");
+  });
+
+  it("still rejects a token with neither accepted scope", async () => {
+    const token = await sign({ scope: ["app_access"] });
+    await expect(verifyAccessToken(token, config, keySet)).rejects.toMatchObject({
+      kind: "insufficient_scope",
+    });
   });
 });

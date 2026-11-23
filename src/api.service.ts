@@ -37,6 +37,10 @@ import {
   MaterializedQueryStatus,
   QueryResult,
   TableMetadataResult,
+  RelevantTablesResponse,
+  ProjectTableList,
+  ScopeDescriptions,
+  MetadataLevel,
 } from "./types";
 import {
   CREATE_CACHE_URL_TEMPLATE,
@@ -64,6 +68,7 @@ import {
   DELETE_QUERY_URL_TEMPLATE,
   DEFAULT_PEAKA_PARTNER_API_BASE_URL,
   DEFAULT_TIMEOUT_MS,
+  PEAKA_MCP_USER_AGENT,
   LIST_CATALOGS_URL_TEMPLATE,
   LIST_COLUMNS_URL_TEMPLATE,
   LIST_ALL_PROJECTS_URL,
@@ -99,6 +104,7 @@ export class APIService {
     this.axiosInstance = axios.create({
       baseURL,
       timeout: timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      headers: { "User-Agent": PEAKA_MCP_USER_AGENT },
     });
     this.axiosInstance.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -116,6 +122,12 @@ export class APIService {
     });
 
     const response = await this.axiosInstance.get<GoldenSqlResult>(url);
+    return response.data;
+  }
+
+  public async searchRelevantTables(projectId: string, question: string, limit = 5): Promise<RelevantTablesResponse> {
+    const response = await this.axiosInstance.get<RelevantTablesResponse>(
+      `metadata/${encodeURIComponent(projectId)}/relevant-tables`, { params: { question, limit } });
     return response.data;
   }
 
@@ -146,6 +158,16 @@ export class APIService {
     return result;
   }
 
+  public async listTableMetadata(projectId: string, params: {catalogId?: string; schemaName?: string; cursor?: string; limit?: number}) {
+    const response = await this.axiosInstance.get(`/metadata/${encodeURIComponent(projectId)}/tables`, {params});
+    return response.data;
+  }
+
+  public async getMetadataOperation(projectId: string, runId: string) {
+    const response = await this.axiosInstance.get(`/metadata/${encodeURIComponent(projectId)}/operations/${encodeURIComponent(runId)}`);
+    return response.data;
+  }
+
   public async getProjectMetadata(
     projectId: string,
     catalogId?: string,
@@ -174,25 +196,48 @@ export class APIService {
   public async getProjectMetadataAs(
     projectId: string,
     format: MetadataFormat,
-    options: { catalogId?: string; schemaName?: string; includeSamples?: boolean } = {}
+    options: { catalogId?: string; schemaName?: string; includeSamples?: boolean; tables?: string[]; levels?: MetadataLevel[] } = {}
   ): Promise<string> {
     const url = GET_PROJECT_METADATA_URL_TEMPLATE({
       projectId,
     });
 
-    const params: Record<string, string> = { format };
+    // One table= a table (a table name may hold a comma); axios would write table[]= for an array.
+    const params = new URLSearchParams({ format });
     if (options.catalogId) {
-      params.catalogId = options.catalogId;
+      params.set("catalogId", options.catalogId);
     }
     if (options.schemaName) {
-      params.schemaName = options.schemaName;
+      params.set("schemaName", options.schemaName);
     }
     if (options.includeSamples) {
-      params.include = "samples";
+      params.set("include", "samples");
+    }
+    if (options.levels?.length) {
+      params.set("levels", options.levels.join(","));
+    }
+    for (const table of options.tables ?? []) {
+      params.append("table", table);
     }
 
     const response = await this.axiosInstance.get<unknown>(url, { params });
     return typeof response.data === "string" ? response.data : JSON.stringify(response.data);
+  }
+
+  /**
+   * The project's tables, one short line each (name, description, column names, joins, cache state), or, when the
+   * scope is too large to list whole, its schemas with their table counts.
+   */
+  public async listProjectTables(
+    projectId: string,
+    options: { catalogId?: string; schemaName?: string } = {}
+  ): Promise<ProjectTableList> {
+    const params: Record<string, string> = {};
+    if (options.catalogId) params.catalogId = options.catalogId;
+    if (options.schemaName) params.schemaName = options.schemaName;
+    const response = await this.axiosInstance.get<ProjectTableList>(
+      `metadata/${encodeURIComponent(projectId)}/table-list`, { params });
+    return response.data;
   }
 
   public async listCatalogs(projectId: string): Promise<Catalog[]> {
@@ -200,8 +245,12 @@ export class APIService {
       projectId,
     });
 
-    const response = await this.axiosInstance.get<Catalog[]>(url);
-    return response.data;
+    const [response, described] = await Promise.all([
+      this.axiosInstance.get<Catalog[]>(url),
+      this.scopeDescriptions(projectId),
+    ]);
+    const byId = new Map(described.map((c) => [c.catalogId, c.description]));
+    return response.data.map((c) => withDescription(c, byId.get(String(c.id))));
   }
 
   public async listSchemas(
@@ -213,8 +262,31 @@ export class APIService {
       catalogId,
     });
 
-    const response = await this.axiosInstance.get<Schema[]>(url);
-    return response.data;
+    const [response, described] = await Promise.all([
+      this.axiosInstance.get<Schema[]>(url),
+      this.scopeDescriptions(projectId, catalogId),
+    ]);
+    // By the catalog each schema came back with: catalogId may be a name, and peaka is two catalogs (Codex review).
+    const byScope = new Map(
+      described.flatMap((c) => c.schemas.map((s) => [`${c.catalogId}|${s.schemaName}`, s.description] as [string, string]))
+    );
+    return response.data.map((s) => withDescription(s, byScope.get(`${s.catalogId}|${s.schemaName}`)));
+  }
+
+  /**
+   * The catalog and schema descriptions written in Peaka. A listing does not depend on them: a deployment without
+   * them, or a failed read, lists catalogs and schemas as before.
+   */
+  private async scopeDescriptions(projectId: string, catalogId?: string): Promise<ScopeDescriptions["catalogs"]> {
+    try {
+      const response = await this.axiosInstance.get<ScopeDescriptions>(
+        `metadata/${encodeURIComponent(projectId)}/descriptions`,
+        { params: catalogId ? { catalogId } : {} }
+      );
+      return response.data?.available ? response.data.catalogs ?? [] : [];
+    } catch {
+      return [];
+    }
   }
 
   public async listTables(
@@ -614,3 +686,7 @@ export class APIService {
     return response.data;
   }
 }
+
+/** Adds a description only when one is written, so an undescribed catalog or schema costs no tokens. */
+const withDescription = <T extends object>(item: T, description: string | undefined): T =>
+  description ? { ...item, description } : item;

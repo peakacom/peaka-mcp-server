@@ -31,7 +31,7 @@ export const registerDeleteCacheTool: ToolRegister = (server) => {
         const svc = resolveService(session);
         const result = await svc.deleteCache(args.projectId, args.cacheId);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_delete_cache" });

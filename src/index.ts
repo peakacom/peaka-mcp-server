@@ -2,10 +2,12 @@
 import { FastMCP } from "fastmcp";
 import { createRemoteJWKSet } from "jose";
 import "dotenv/config";
-import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE, DEFAULT_PORT } from "./constants";
+import { PEAKA_SQL_RULE_SET, PEAKA_ARTIFACT_TEMPLATE, DEFAULT_PORT, PEAKA_MCP_VERSION, PEAKA_SERVER_INSTRUCTIONS } from "./constants";
 import type { PeakaSession } from "./types";
 import { getMode } from "./context";
+import { budgetedServer } from "./tools/budget";
 import { loadAuthConfig, createAuthenticator } from "./auth";
+import { startFrontProxy } from "./projectPath";
 import {
   registerQueryTools,
   registerMetadataTools,
@@ -29,7 +31,8 @@ const authenticate =
 
 const server = new FastMCP<PeakaSession>({
   name: "Peaka",
-  version: "0.15.2",
+  version: PEAKA_MCP_VERSION,
+  instructions: PEAKA_SERVER_INSTRUCTIONS,
   ...(mode === "httpStream" && {
     authenticate,
     health: {
@@ -38,13 +41,15 @@ const server = new FastMCP<PeakaSession>({
   }),
 });
 
-registerQueryTools(server);
-registerMetadataTools(server);
-registerCacheTools(server);
-registerListTools(server);
-registerTableTools(server);
-registerConnectionTools(server);
-registerSemanticTools(server);
+// Every tool answer within the response budget (DEV-4186).
+const tools = budgetedServer(server);
+registerQueryTools(tools);
+registerMetadataTools(tools);
+registerCacheTools(tools);
+registerListTools(tools);
+registerTableTools(tools);
+registerConnectionTools(tools);
+registerSemanticTools(tools);
 
 server.addResource({
   uri: "file:///peaka_sql_query_rule_set.txt",
@@ -78,15 +83,24 @@ const onStartError = (error: unknown) => {
 };
 
 if (mode === "httpStream") {
+  // fastmcp matches its stream endpoint path exactly, so it listens on the
+  // loopback and the front proxy owns the public port: it rewrites the
+  // project-preselected form /p/{projectId}/mcp to /mcp (DEV-4244) and passes
+  // everything else through.
+  const publicPort = process.env.PORT ? Number(process.env.PORT) : DEFAULT_PORT;
+  const internalPort = publicPort + 1;
   server
     .start({
       transportType: "httpStream",
       httpStream: {
-        port: process.env.PORT ? Number(process.env.PORT) : DEFAULT_PORT,
+        port: internalPort,
         stateless: true,
-        host: "0.0.0.0",
+        host: "127.0.0.1",
       },
     })
+    .then(() =>
+      startFrontProxy({ publicPort, publicHost: "0.0.0.0", internalPort }),
+    )
     .catch(onStartError);
 } else {
   server.start({ transportType: "stdio" }).catch(onStartError);

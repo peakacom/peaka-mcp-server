@@ -121,3 +121,7 @@ export function filterMetadataResponse(data: ProjectMetadataResponse): ProjectMe
     })),
   };
 }
+
+/** A catalogId parameter takes the catalog's id or its name as written in SQL (DEV-4216). */
+export const CATALOG_REF =
+  'The catalog\'s id, or its name as written in SQL (e.g. "stripe" in stripe.payment.charges). "peaka" with schemaName query or mtquery is the saved queries, with any other schema the Peaka tables.';

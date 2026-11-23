@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, CATALOG_REF } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
 
@@ -21,7 +21,7 @@ export const registerGetMetadataRefreshStatusTool: ToolRegister = (server) => {
       projectId: z.string().describe("The Peaka project ID to run against."),
       catalogId: z
         .string()
-        .describe("The catalog ID to check refresh status for."),
+        .describe(`The catalog to check refresh status for. ${CATALOG_REF}`),
     }),
     execute: async (args, { log, session }) => {
       try {
@@ -31,7 +31,7 @@ export const registerGetMetadataRefreshStatusTool: ToolRegister = (server) => {
           args.catalogId
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_get_metadata_refresh_status" });

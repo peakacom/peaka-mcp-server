@@ -43,7 +43,7 @@ export const registerCreateQueryTool: ToolRegister = (server) => {
           ...(args.schedule ? { schedule: args.schedule } : {}),
         });
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_create_query" });

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT, cacheScheduleSchema, requireWrite } from "../shared";
+import { CATALOG_REF, PROJECT_ID_HINT, cacheScheduleSchema, requireWrite } from "../shared";
 import type { ToolRegister } from "../types";
 import type { CreateCacheRequest } from "../../types";
 import { handleToolError } from "../../error";
@@ -9,7 +9,7 @@ export const registerCreateCacheBatchTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_create_cache_batch",
     description:
-      `Create caches for multiple tables in a single call. Use this instead of repeated peaka_create_cache calls when caching many tables. Items are processed independently, so some can succeed while others fail: the response contains one entry per item with success, error, and the created cache. Check every entry and report or retry the failed ones rather than assuming the whole batch succeeded. Each item supports the same optional schedule expressions as peaka_create_cache (ISO-8601 durations, e.g. PT6H, P1D, P7D, P30D).
+      `Create caches for multiple tables in a single call. Use this instead of repeated peaka_create_cache calls when caching many tables. Only for tables of a SaaS source that are not cached yet (peaka_list_project_tables: a SaaS schema's table without [cached]; peaka_list_tables: not_cached): a live read of them may return only the first page of records. A database table (e.g. Oracle) is read live and in full and is not cached. Create a cache only when the user asks for it or agrees to it, never to work around a failing or slow query; the first sync takes time, and until it completes the cache is not complete. Items are processed independently, so some can succeed while others fail: the response contains one entry per item with success, error, and the created cache. Check every entry and report or retry the failed ones rather than assuming the whole batch succeeded. Each item supports the same optional schedule expressions as peaka_create_cache (ISO-8601 durations, e.g. PT6H, P1D, P7D, P30D).
 
     ${PROJECT_ID_HINT}`,
     annotations: {
@@ -24,7 +24,7 @@ export const registerCreateCacheBatchTool: ToolRegister = (server) => {
       items: z
         .array(
           z.object({
-            catalogId: z.string(),
+            catalogId: z.string().describe(CATALOG_REF),
             schemaName: z.string(),
             tableName: z.string(),
             incrementalSchedule: cacheScheduleSchema().optional().describe(
@@ -58,7 +58,7 @@ export const registerCreateCacheBatchTool: ToolRegister = (server) => {
         const svc = resolveService(session);
         const result = await svc.createCacheBatch(args.projectId, items);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_create_cache_batch" });

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { resolveService } from "../../context";
-import { PROJECT_ID_HINT } from "../shared";
+import { PROJECT_ID_HINT, CATALOG_REF } from "../shared";
 import type { ToolRegister } from "../types";
 import { handleToolError } from "../../error";
 
@@ -8,7 +8,7 @@ export const registerListSchemasTool: ToolRegister = (server) => {
   server.addTool({
     name: "peaka_list_schemas",
     description:
-      `List all available schemas for a given catalog in the Peaka project.
+      `List all available schemas for a given catalog in the Peaka project, with a schema's description (what it holds) when one is written.
 
     ${PROJECT_ID_HINT}`,
     annotations: {
@@ -19,14 +19,14 @@ export const registerListSchemasTool: ToolRegister = (server) => {
     },
     parameters: z.object({
       projectId: z.string().describe("The Peaka project ID to run against."),
-      catalogId: z.string(),
+      catalogId: z.string().describe(CATALOG_REF),
     }),
     execute: async (args, { log, session }) => {
       try {
         const svc = resolveService(session);
         const result = await svc.listSchemas(args.projectId, args.catalogId);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_list_schemas" });

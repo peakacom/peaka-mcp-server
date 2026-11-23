@@ -32,7 +32,7 @@ export const registerRefreshProjectMetadataTool: ToolRegister = (server) => {
           args.catalogId
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       } catch (error) {
         handleToolError(error, log, { tool: "peaka_refresh_project_metadata" });

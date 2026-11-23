@@ -49,8 +49,15 @@ describe("peaka_get_project_metadata format", () => {
     const result = await call({ catalogId: "1" });
     const body = JSON.parse(result.content[0].text);
     expect(body.metadata[0].metadata.columns).toEqual([{ columnName: "a", columnDescription: "", isSystem: false }]);
-    expect(result.content[0].text).toContain("\n  ");
+    expect(result.content[0].text).not.toContain("\n");
     expect(requests.at(-1)).toBe("/metadata/p?catalogId=1");
+  });
+
+  it("levels reach the API as one list and imply compact", async () => {
+    await call({ levels: ["catalogs", "schemas"] });
+    expect(requests.at(-1)).toBe("/metadata/p?format=compact&levels=catalogs%2Cschemas");
+    await call({ format: "ddl", catalogId: "1", levels: ["schemas"] });
+    expect(requests.at(-1)).toBe("/metadata/p?format=ddl&catalogId=1&levels=schemas");
   });
 
   it("compact and ddl come back as the API wrote them, samples only when asked", async () => {
@@ -65,5 +72,15 @@ describe("peaka_get_project_metadata format", () => {
 
   it("refuses samples without a format", async () => {
     await expect(call({ includeSamples: true })).rejects.toThrow(/needs format/);
+  });
+
+  it("reads named tables compact by default, one table parameter each", async () => {
+    const result = await call({ tables: ["stripe.payment.charges", "bank.core.my table,x"] });
+    expect(JSON.parse(result.content[0].text)).toEqual({ tables: [{ table: "c.s.t", columns: [{ name: "a", type: "bigint" }] }] });
+    expect(requests.at(-1)).toBe("/metadata/p?format=compact&table=stripe.payment.charges&table=bank.core.my+table%2Cx");
+  });
+
+  it("refuses named tables together with a scope", async () => {
+    await expect(call({ tables: ["a.b.c"], catalogId: "1" })).rejects.toThrow(/not both/);
   });
 });

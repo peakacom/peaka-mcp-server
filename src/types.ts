@@ -34,6 +34,36 @@ export interface TableMetadataResult {
   result: TableMetadata[];
 }
 
+export interface RelevantTablesResponse {
+  status: "ready" | "partial" | "empty" | "unavailable";
+  reason: string | null;
+  index: string;
+  coverage: "partial" | "unknown";
+  tables: {
+    projectId: string;
+    catalogId: string;
+    schemaName: string;
+    tableName: string;
+    catalog: string;
+    description: string;
+    columns: { name: string; type: string; description: string; primaryKey: boolean }[];
+    metadataReadiness: "source_verified";
+  }[];
+  nextAction: string;
+}
+
+export type ProjectTableList =
+  | { status: "listed"; scope: { catalogId?: string; schemaName?: string }; tables: number; tokens: number; legend: string; list: string }
+  | {
+      status: "too_large";
+      reason: "too_many_tables" | "over_token_budget";
+      scope: { catalogId?: string; schemaName?: string };
+      tables: number;
+      tokens?: number;
+      schemas: { catalog: string; catalogId: string; schema: string; tables: number }[];
+      nextAction: string;
+    };
+
 export interface ProjectMetadataEntry {
   id: string;
   content: string;
@@ -42,6 +72,9 @@ export interface ProjectMetadataEntry {
 
 export const METADATA_FORMATS = ["compact", "ddl"] as const;
 export type MetadataFormat = (typeof METADATA_FORMATS)[number];
+/** The parts of a compact or ddl answer, always given in this order. */
+export const METADATA_LEVELS = ["catalogs", "schemas", "tables"] as const;
+export type MetadataLevel = (typeof METADATA_LEVELS)[number];
 
 export interface ProjectMetadataResponse {
   metadata: ProjectMetadataEntry[];
@@ -109,12 +142,26 @@ export interface Catalog {
   displayName: string;
   catalogType: string;
   connectionId: string | null;
+  /** What the catalog holds, written in Peaka; absent when none is written. */
+  description?: string;
 }
 
 export interface Schema {
   catalogId: string;
   catalogName: string;
   schemaName: string;
+  /** What the schema holds, written in Peaka; absent when none is written. */
+  description?: string;
+}
+
+/** GET metadata/:projectId/descriptions: catalog and schema descriptions, a shared catalog's from its owner. */
+export interface ScopeDescriptions {
+  available: boolean;
+  catalogs: {
+    catalogId: string;
+    description: string;
+    schemas: { schemaName: string; description: string }[];
+  }[];
 }
 
 export interface Table {
@@ -371,9 +418,16 @@ export interface QueryResultCellValue {
   order: number;
 }
 
+/** A SaaS table a statement read and how (DEV-4186); database tables are not listed. */
+export interface QueryReadTable {
+  table: string;
+  cache: "live" | "preparing" | "ready" | "unknown" | string;
+}
+
 export interface QueryResult {
   columns: QueryResultColumn[];
   data: QueryResultCellValue[][];
+  tables?: QueryReadTable[];
 }
 
 export enum RelationshipType {

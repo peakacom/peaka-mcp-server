@@ -79,7 +79,8 @@ export class TokenError extends Error {
 export interface AuthConfig {
   issuer: string;
   jwksUri: string;
-  requiredScope: string;
+  /** Any one of these satisfies the scope gate (a token for Peaka data access). */
+  requiredScopes: string[];
   /**
    * Expected audience (the MCP resource). Optional and OFF by default: the
    * Peaka OAuth server currently sets `aud` to the client_id rather than the
@@ -103,7 +104,14 @@ export function loadAuthConfig(env: NodeJS.ProcessEnv = process.env): AuthConfig
   return {
     issuer,
     jwksUri,
-    requiredScope: env.OAUTH_REQUIRED_SCOPE || "user_access",
+    // OAUTH_REQUIRED_SCOPE picks the coarse scope(s); the fine-grained
+    // catalog's universal base is always accepted besides them, because every
+    // project-restricted token carries project:read and no deployment should
+    // have to learn that through an env change (DEV-4237).
+    requiredScopes: [
+      ...(env.OAUTH_REQUIRED_SCOPE || "user_access").split(/[\s,]+/).filter(Boolean),
+      "project:read",
+    ],
     audience: env.OAUTH_RESOURCE || undefined,
   };
 }
@@ -149,10 +157,10 @@ export async function verifyAccessToken(
   }
 
   const scopes = extractScopes(payload);
-  if (!scopes.includes(config.requiredScope)) {
+  if (!config.requiredScopes.some((scope) => scopes.includes(scope))) {
     throw new TokenError(
       "insufficient_scope",
-      `Token is missing required scope "${config.requiredScope}"`,
+      `Token is missing a required scope (any of: ${config.requiredScopes.join(", ")})`,
     );
   }
 
@@ -173,6 +181,12 @@ function firstHeader(value: string | string[] | undefined): string | undefined {
 /**
  * Builds the OAuth protected-resource metadata URL on the MCP server's own
  * origin, derived from the (proxy-)forwarded request host.
+ *
+ * A request that arrived on the project-preselected form (/p/{projectId}/mcp,
+ * rewritten by the front proxy, which states the original path in its own
+ * header — client-sent values never survive it) gets the RFC 9728
+ * path-inserted metadata URL, so discovery hands the client the per-project
+ * resource and the consent screen preselects that project (DEV-4244).
  */
 export function resourceMetadataUrl(headers: IncomingHttpHeaders): string {
   const proto = firstHeader(headers["x-forwarded-proto"]);
@@ -180,8 +194,13 @@ export function resourceMetadataUrl(headers: IncomingHttpHeaders): string {
   if (!host) {
     throw new Error("Cannot determine request host for OAuth metadata");
   }
+  const forwardedPath = firstHeader(headers["x-peaka-forwarded-path"]);
+  const projectPath =
+    forwardedPath && /^\/p\/[A-Za-z0-9_-]+\/mcp$/.test(forwardedPath)
+      ? forwardedPath
+      : "";
   return new URL(
-    "/.well-known/oauth-protected-resource",
+    `/.well-known/oauth-protected-resource${projectPath}`,
     `${proto ?? "https"}://${host}`,
   ).toString();
 }
@@ -289,7 +308,7 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
         const presented = presentedIdentifiers(token);
         if (err.kind === "insufficient_scope") {
           console.warn(
-            `[auth] 403 insufficient_scope required="${logSafe(config.requiredScope)}" ` +
+            `[auth] 403 insufficient_scope required="${logSafe(config.requiredScopes.join(" "))}" ` +
               `presented_scope="${presented.scope}" host=${host}`,
           );
           throw buildChallenge({
@@ -297,7 +316,7 @@ export function createAuthenticator(config: AuthConfig, keySet: JWTVerifyGetKey)
             error: "insufficient_scope",
             description: err.description,
             resourceMetadata,
-            scope: config.requiredScope,
+            scope: config.requiredScopes.join(" "),
           });
         }
         console.warn(
